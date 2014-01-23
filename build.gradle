@@ -1,0 +1,37 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+dependencies {
+}
+
+uploadArchives {
+	def gitroscm = "https://github.com/toxbee/fimpl-core"
+
+	repositories.mavenDeployer {
+		repository( url: uri( "maven-deploy" ) )
+		pom.version = '0.1'
+		pom.groupId = 'se.toxbee.fimpl'
+		pom.artifactId = 'fimpl-core'
+		pom.project {
+			scm {
+				url "${gitroscm}";
+				connection "${gitroscm}";
+			}
+
+			licenses {
+				license {
+					name 'The Apache Software License, Version 2.0'
+					url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					distribution 'repo'
+				}
+			}
+		}
+	}
+}
+
+build.dependsOn uploadArchives
+
+// Task to generate a gradle wrapper.
+task wrapper( type: Wrapper ) {
+	gradleVersion = '1.10'
+}
