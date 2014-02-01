@@ -31,6 +31,7 @@ import se.toxbee.fimpl.impl.CollectionIndexTransformer;
 import se.toxbee.fimpl.impl.ImplementationInformationImpl;
 
 /**
+ * MetainfTransformer transforms InputStream:s to ImplementationInformation:s.
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0

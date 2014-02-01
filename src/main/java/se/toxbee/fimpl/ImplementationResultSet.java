@@ -100,8 +100,10 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	 * @return the given set.
 	 */
 	protected Set<ImplementationInformation> fillSet( Set<ImplementationInformation> set, Iterator<ImplementationInformation> iter ) {
-		while ( iter.hasNext() ) {
-			set.add( iter.next() );
+		if ( iter != null ) {
+			while ( iter.hasNext() ) {
+				set.add( iter.next() );
+			}
 		}
 
 		return set;

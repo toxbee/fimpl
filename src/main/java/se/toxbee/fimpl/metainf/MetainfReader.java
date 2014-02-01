@@ -20,6 +20,7 @@ import java.net.URL;
 import se.toxbee.fimpl.impl.ImplementationReaderPipe;
 
 /**
+ * MetainfReader is a pipe of MetainfTransformer -> MetainfLookupProvider.
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0

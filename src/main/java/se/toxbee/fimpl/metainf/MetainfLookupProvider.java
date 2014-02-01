@@ -32,7 +32,8 @@ import java.util.jar.JarFile;
 import se.toxbee.fimpl.impl.InterfaceLookupProvider;
 
 /**
- * MetainfLookupProvider looks up in
+ * MetainfLookupProvider looks up in META-INF + jars or folders like it.
+ *
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0
