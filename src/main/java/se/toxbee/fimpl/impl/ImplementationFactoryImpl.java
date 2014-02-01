@@ -19,7 +19,7 @@ import se.toxbee.fimpl.ImplementationReader;
 import se.toxbee.fimpl.ImplementationFactory;
 import se.toxbee.fimpl.ImplementationLoader;
 
-import static se.toxbee.fimpl.util.Util.guardNull;
+import static se.toxbee.fimpl.Util.guardNull;
 
 /**
  * ImplementationFactoryImpl a field backed {@link se.toxbee.fimpl.ImplementationFactory}.

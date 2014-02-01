@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
+
+import se.toxbee.fimpl.Util;
 
 /**
  * InputStreamHelper helps with reading an InputStream to a String.
@@ -30,11 +31,10 @@ import java.nio.charset.Charset;
  * @since Jan, 17, 2014
  */
 public class InputStreamHelper {
-	private static final Charset CHARSET = Charset.forName( "UTF-8" );
 	private static final int BUF_SIZE = 0x800; // 2K chars (4K bytes)
 
 	public static String toString( InputStream in ) throws IOException {
-		InputStreamReader reader = new InputStreamReader( in, CHARSET );
+		InputStreamReader reader = new InputStreamReader( in, Util.CHARSET );
 		try {
 			return toString( reader );
 		} finally {

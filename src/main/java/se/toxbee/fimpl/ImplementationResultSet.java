@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import se.toxbee.fimpl.predicates.Predicate;
 import se.toxbee.fimpl.predicates.PredicateFactory;
 
-import static se.toxbee.fimpl.util.Util.guardNull;
+import static se.toxbee.fimpl.Util.guardNull;
 
 /**
  * <p>ImplementationResultSet is the main API for fImpl.</p>

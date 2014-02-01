@@ -15,6 +15,8 @@
  */
 package se.toxbee.fimpl.metainf;
 
+import java.net.URL;
+
 import se.toxbee.fimpl.impl.ImplementationReaderPipe;
 
 /**
@@ -26,5 +28,9 @@ import se.toxbee.fimpl.impl.ImplementationReaderPipe;
 public class MetainfReader extends ImplementationReaderPipe {
 	public MetainfReader() {
 		super( new MetainfTransformer(), new MetainfLookupProvider( null ) );
+	}
+
+	public MetainfReader( ClassLoader cl, String path, URL... urls ) {
+		super( new MetainfTransformer(), new MetainfLookupProvider( cl, path, urls ) );
 	}
 }

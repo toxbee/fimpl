@@ -18,7 +18,6 @@ package se.toxbee.fimpl.impl;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import se.toxbee.fimpl.util.ImmutableIterator;
 import se.toxbee.fimpl.ImplementationInformation;
 
 /**
@@ -35,5 +34,5 @@ public interface CollectionIndexTransformer {
 	 * @param in the iterator of InputStreams to read from.
 	 * @return the collection.
 	 */
-	public ImmutableIterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in );
+	public Iterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in );
 }

@@ -15,7 +15,7 @@
  */
 package se.toxbee.fimpl;
 
-import se.toxbee.fimpl.util.ImmutableIterator;
+import java.util.Iterator;
 
 /**
  * ImplementationReader reads and provides ImplementationCollections.
@@ -31,5 +31,5 @@ public interface ImplementationReader {
 	 * @param interfase the interface class object.
 	 * @return the collection.
 	 */
-	public <I> ImmutableIterator<ImplementationInformation> readImplementationCollection( Class<I> interfase );
+	public <I> Iterator<ImplementationInformation> readImplementationCollection( Class<I> interfase );
 }

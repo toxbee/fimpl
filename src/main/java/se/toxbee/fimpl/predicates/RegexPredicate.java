@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import se.toxbee.fimpl.ImplementationResultSet;
 import se.toxbee.fimpl.ImplementationInformation;
 
-import static se.toxbee.fimpl.util.Util.guardNull;
+import static se.toxbee.fimpl.Util.guardNull;
 
 /**
  * RegexPredicate uses a regex pattern to match against something.

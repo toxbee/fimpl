@@ -16,13 +16,12 @@
 package se.toxbee.fimpl.impl;
 
 import java.io.InputStream;
+import java.util.Iterator;
 
 import se.toxbee.fimpl.ImplementationInformation;
 import se.toxbee.fimpl.ImplementationReader;
-import se.toxbee.fimpl.util.ClosableIterator;
-import se.toxbee.fimpl.util.ImmutableIterator;
 
-import static se.toxbee.fimpl.util.Util.guardNull;
+import static se.toxbee.fimpl.Util.guardNull;
 
 /**
  * ImplementationReaderPipe is a "pipe" separating<br/>
@@ -49,8 +48,8 @@ public class ImplementationReaderPipe implements ImplementationReader {
 	}
 
 	@Override
-	public <I> ImmutableIterator<ImplementationInformation> readImplementationCollection( Class<I> interfase ) {
-		ClosableIterator<InputStream> in = this.lookupProvider.interfaceLookupStream( interfase );
+	public <I> Iterator<ImplementationInformation> readImplementationCollection( Class<I> interfase ) {
+		Iterator<InputStream> in = this.lookupProvider.interfaceLookupStream( interfase );
 		return this.transformer.readImplementationCollection( in );
 	}
 }

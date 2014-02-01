@@ -25,13 +25,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.jar.JarFile;
 
 import se.toxbee.fimpl.impl.InterfaceLookupProvider;
-import se.toxbee.fimpl.util.ClosableIterator;
 
 /**
+ * MetainfLookupProvider looks up in
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0
@@ -67,7 +68,7 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 	 * @param path the path to override
 	 */
 	public void setSuggestedBase( String path ) {
-		if ( path == null ){
+		if ( path == null ) {
 			path = "";
 		} else if ( path.length() > 0 && !path.endsWith( "/" ) ) {
 			path += '/';
@@ -86,6 +87,11 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 		return this.path;
 	}
 
+	/**
+	 * Sets the extra URLs to look in.
+	 *
+	 * @param urls the urls, if null, there are none.
+	 */
 	public void setURLs( URL... urls ) {
 		if ( urls == null || urls.length == 0 ) {
 			this.urls = null;
@@ -99,6 +105,7 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 				try {
 					urls[i] = new URL( "jar", "", -1, url.toString() + "!/" );
 				} catch ( MalformedURLException e ) {
+					throw new RuntimeException( e );
 				}
 			}
 
@@ -107,7 +114,7 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 	}
 
 	@Override
-	public <I> ClosableIterator<InputStream> interfaceLookupStream( Class<I> interfase ) {
+	public <I> Iterator<InputStream> interfaceLookupStream( Class<I> interfase ) {
 		String fullUri = this.path + interfase.getName();
 
 		Enumeration<URL> res;
@@ -120,17 +127,12 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 		return res.hasMoreElements() ? new IterAdapter( res ) : null;
 	}
 
-	private static class IterAdapter implements ClosableIterator<InputStream> {
+	private static class IterAdapter implements Iterator<InputStream> {
 		private final Enumeration<URL> urls;
 
 		private IterAdapter( Enumeration<URL> urls ) {
 			this.urls = urls;
 		}
-
-		@Override
-		public void close() {
-		}
-
 		@Override
 		public boolean hasNext() {
 			return this.urls.hasMoreElements();
@@ -276,9 +278,12 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 					}
 				}
 			} catch ( MalformedURLException e ) {
+				throw new RuntimeException( e );
 				// Keep iterating through the URL list
 			} catch ( IOException e ) {
+				throw new RuntimeException( e );
 			} catch ( SecurityException e ) {
+				throw new RuntimeException( e );
 			}
 		}
 		return null;

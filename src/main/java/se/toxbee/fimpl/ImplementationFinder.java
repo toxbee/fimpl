@@ -15,10 +15,11 @@
  */
 package se.toxbee.fimpl;
 
-import se.toxbee.fimpl.ImplementationResultSet.Impl;
-import se.toxbee.fimpl.util.ImmutableIterator;
+import java.util.Iterator;
 
-import static se.toxbee.fimpl.util.Util.guardNull;
+import se.toxbee.fimpl.ImplementationResultSet.Impl;
+
+import static se.toxbee.fimpl.Util.guardNull;
 
 /**
  * <p>ImplementationFinder is the entry/front class API for fImpl.</p>
@@ -58,11 +59,11 @@ public class ImplementationFinder {
 	 * @param <I> the interface type.
 	 * @return the "collection".
 	 */
-	public <I> ImmutableIterator<ImplementationInformation> findRaw( Class<I> interfase ) {
+	public <I> Iterator<ImplementationInformation> findRaw( Class<I> interfase ) {
 		return this.findImplementationCollection( interfase );
 	}
 
-	protected <I> ImmutableIterator<ImplementationInformation> findImplementationCollection( Class<I> interfase ) {
+	protected <I> Iterator<ImplementationInformation> findImplementationCollection( Class<I> interfase ) {
 		return this.provider.reader().readImplementationCollection( interfase );
 	}
 }

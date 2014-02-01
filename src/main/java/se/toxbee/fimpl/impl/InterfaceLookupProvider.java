@@ -16,8 +16,7 @@
 package se.toxbee.fimpl.impl;
 
 import java.io.InputStream;
-
-import se.toxbee.fimpl.util.ClosableIterator;
+import java.util.Iterator;
 
 /**
  * <p>InterfaceLookupProvider provides InputStreams that contain<br/>
@@ -35,5 +34,5 @@ public interface InterfaceLookupProvider {
 	 * @param <I> the type of the interface.
 	 * @return the iterator that contains implementations listings, or null if there's none.
 	 */
-	public <I> ClosableIterator<InputStream> interfaceLookupStream( Class<I> interfase );
+	public <I> Iterator<InputStream> interfaceLookupStream( Class<I> interfase );
 }

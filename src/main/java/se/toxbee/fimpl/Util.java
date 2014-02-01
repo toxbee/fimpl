@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.toxbee.fimpl.util;
+package se.toxbee.fimpl;
+
+import java.nio.charset.Charset;
 
 /**
  * Util provides common utilities for objects of any kind.
@@ -23,6 +25,8 @@ package se.toxbee.fimpl.util;
  * @since Jan, 23, 2014
  */
 public class Util {
+	public static Charset CHARSET = Charset.forName( "UTF-8" );
+
 	/**
 	 * Checks if two possibly null valued objects are equal.
 	 *

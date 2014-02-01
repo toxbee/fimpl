@@ -15,13 +15,20 @@
  */
 package se.toxbee.fimpl.metainf;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import se.toxbee.fimpl.ImplementationInformation;
+import se.toxbee.fimpl.Util;
 import se.toxbee.fimpl.impl.CollectionIndexTransformer;
-import se.toxbee.fimpl.util.ImmutableIterator;
+import se.toxbee.fimpl.impl.ImplementationInformationImpl;
 
 /**
  *
@@ -30,7 +37,113 @@ import se.toxbee.fimpl.util.ImmutableIterator;
  * @since Jan, 25, 2014
  */
 public class MetainfTransformer implements CollectionIndexTransformer {
+	private static final int BUF_SIZE = 100;
+
 	@Override
-	public ImmutableIterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in ) {
+	public Iterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in ) {
+		if ( !in.hasNext() ) {
+			return null;
+		}
+
+		StringBuilder builder = new StringBuilder( BUF_SIZE );
+		List<ImplementationInformation> list = new ArrayList<ImplementationInformation>();
+
+		while ( in.hasNext() ) {
+			// Open stream & reader.
+			BufferedReader reader = new BufferedReader( new InputStreamReader( in.next(), Util.CHARSET ) );
+			while ( readInfo( list, builder, reader ) );
+			close( reader );
+		}
+
+		return list.iterator();
+	}
+
+	private static boolean readInfo( List<ImplementationInformation> l, StringBuilder builder, Reader reader ) {
+		Object[] d = new Object[4];
+		int r;
+
+		// Read implementation class.
+		r = readToTab( builder, reader );
+		d[0] = builder.toString();
+		if ( r == '\n' || r == -1 ) {
+			return addInfo( r, d, l );
+		}
+
+		// Read priority.
+		r = readToTab( builder, reader );
+		String data = builder.toString();
+		if ( data.equals( "min" ) ) {
+			d[1] = Integer.MIN_VALUE;
+		} else if ( data.equals( "max" ) ) {
+			d[1] = Integer.MIN_VALUE;
+		} else {
+			d[1] = Integer.parseInt( data );
+		}
+		if ( r == '\n' || r == -1 ) {
+			return addInfo( r, d, l );
+		}
+
+		// Read type.
+		r = readToTab( builder, reader );
+		d[2] = builder.toString();
+		if ( r == '\n' || r == -1 ) {
+			return addInfo( r, d, l );
+		}
+
+		// Read extras.
+		r = readToTab( builder, reader );
+		d[3] = builder.toString();
+		if ( r == '\n' || r == -1 ) {
+			return addInfo( r, d, l );
+		}
+
+		// Eat anything left before newline.
+		while ( true ) {
+			switch ( read( reader ) ) {
+				case -1:
+					return true;
+
+				case '\n':
+					return false;
+			}
+		}
+	}
+
+	private static boolean addInfo( int r, Object[] data, List<ImplementationInformation> list ) {
+		list.add( new ImplementationInformationImpl( (String) data[0], (Integer) data[1], (String) data[2], data[3] ) );
+		return r != -1;
+	}
+
+	private static int readToTab( StringBuilder builder, Reader reader ) {
+		if ( builder.length() > 0 ) {
+			builder.delete( 0, builder.length() );
+		}
+
+		while ( true ) {
+			int c = read( reader );
+
+			if ( c == -1 || c == '\n' || c == '\t' ) {
+				return c;
+			}
+
+			builder.append( (char) c );
+		}
+	}
+
+	private static int read( Reader reader ) {
+		try {
+			return reader.read();
+		} catch ( IOException e ) {
+			close( reader );
+			throw new RuntimeException( e );
+		}
+	}
+
+	private static void close( Closeable c ) {
+		try {
+			c.close();
+		} catch ( IOException e ) {
+			throw new RuntimeException( e );
+		}
 	}
 }
