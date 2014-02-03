@@ -13,8 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package se.toxbee.fimpl.predicates;
 
-// Task to generate a gradle wrapper.
-task wrapper( type: Wrapper ) {
-	gradleVersion = '1.10'
+import se.toxbee.fimpl.ImplementationResultSet;
+import se.toxbee.fimpl.common.ImplementationInformation;
+
+/**
+ * TypeTransformer is a PredicateInputTransformer for types.
+ *
+ * @param <I> the interface type of the set.
+ * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
+ * @version 1.0
+ * @since Jan, 24, 2014
+ */
+public class TypeTransformer<I> implements PredicateInputTransformer<I, String> {
+	@Override
+	public String transformForPredicate( ImplementationInformation info, ImplementationResultSet<I, ?> set ) {
+		return info.getType();
+	}
 }

@@ -13,8 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package se.toxbee.fimpl;
 
-// Task to generate a gradle wrapper.
-task wrapper( type: Wrapper ) {
-	gradleVersion = '1.10'
+import java.util.Iterator;
+
+import se.toxbee.fimpl.common.ImplementationInformation;
+
+/**
+ * ImplementationReader reads and provides ImplementationCollections.
+ *
+ * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
+ * @version 1.0
+ * @since Jan, 17, 2014
+ */
+public interface ImplementationReader {
+	/**
+	 * Reads a ImplementationCollection for an interface class object.
+	 *
+	 * @param interfase the interface class object.
+	 * @return the collection.
+	 */
+	public <I> Iterator<ImplementationInformation> readImplementationCollection( Class<I> interfase );
 }
