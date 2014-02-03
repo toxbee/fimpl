@@ -50,6 +50,17 @@ subprojects {
 			}
 		}
 	}
+
+	// Used for testing:
+	apply plugin: 'groovy'
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+
+	}
 }
 
 project( ':fimpl-common' ) {

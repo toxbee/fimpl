@@ -67,6 +67,17 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 	 */
 
 	/**
+	 * Constructor, enforces non-empty implementorClass.
+	 *
+	 * @param implementorClass the non-empty implementorClass.
+	 */
+	protected ImplementationInformation( String implementorClass ) {
+		if ( implementorClass == null || implementorClass.isEmpty() ) {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	/**
 	 * Must return hashCode of {@link #getImplementorClass()}.
 	 *
 	 * @return the hashCode.
@@ -136,6 +147,7 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 		 * @param extras optional extra data.
 		 */
 		public Impl( String implementorClass, int priority, String type, Object extras ) {
+			super( implementorClass );
 			this.implementorClass = implementorClass;
 			this.priority = priority;
 			this.type = type;
