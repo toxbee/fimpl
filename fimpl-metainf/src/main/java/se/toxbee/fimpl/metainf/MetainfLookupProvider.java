@@ -253,7 +253,7 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 					buf.append( fixedResName );
 					String filename = buf.toString();
 					File file = new File( filename );
-					File file2 = new File( URLDecoder.decode( filename ) );
+					File file2 = new File( URLDecoder.decode( filename, "UTF-8" ) );
 
 					if ( file.exists() || file2.exists() ) {
 						return targetURL( currentUrl, fixedResName );

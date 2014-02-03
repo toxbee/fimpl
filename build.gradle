@@ -14,7 +14,65 @@
  * limitations under the License.
  */
 
-// Task to generate a gradle wrapper.
 task wrapper( type: Wrapper ) {
 	gradleVersion = '1.10'
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'maven'
+
+	build.finalizedBy uploadArchives
+
+	group = "se.toxbee.fimpl"
+
+	uploadArchives {
+		def gitroscm = "https://github.com/toxbee/fimpl-core"
+
+		repositories.mavenDeployer {
+			repository( url: uri( "../maven-deploy" ) )
+			pom {
+				project {
+					inceptionYear '2014'
+					scm {
+						url "${gitroscm}";
+						connection "${gitroscm}";
+					}
+
+					licenses {
+						license {
+							name 'The Apache Software License, Version 2.0'
+							url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+							distribution 'repo'
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+project( ':fimpl-common' ) {
+	version = '0.1'
+}
+
+project( ':fimpl-annotate' ) {
+	dependencies {
+		compile project( ':fimpl-common' )
+	}
+	version = '0.1'
+}
+
+project( ':fimpl-api' ) {
+	dependencies {
+		compile project( ':fimpl-common' )
+	}
+	version = '0.1'
+}
+
+project( ':fimpl-metainf' ) {
+	dependencies {
+		compile project( ':fimpl-api' )
+	}
+	version = '0.1'
 }
