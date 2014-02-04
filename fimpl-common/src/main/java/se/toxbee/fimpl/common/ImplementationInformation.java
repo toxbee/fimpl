@@ -118,6 +118,15 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 		protected final Object extras;
 
 		/**
+		 * Constructs the information entity with implementorClass, 0 as priority and no type or extras.
+		 *
+		 * @param implementorClass the relative or fully qualified name of the implementing class.
+		 */
+		public Impl( String implementorClass ) {
+			this( implementorClass, 0 );
+		}
+
+		/**
 		 * Constructs the information entity with implementorClass, priority and no type or extras.
 		 *
 		 * @param implementorClass the relative or fully qualified name of the implementing class.

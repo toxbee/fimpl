@@ -16,7 +16,6 @@
 
 package se.toxbee.fimpl
 
-import se.toxbee.fimpl.common.ImplementationInformation
 import se.toxbee.fimpl.impl.ImplementationFactoryImpl
 import spock.lang.Specification
 
@@ -28,41 +27,25 @@ class ImplementationFinderTest extends Specification {
 			thrown( NullPointerException )
 	}
 
+	def "Provider"() {
+		given:
+			ImplementationFactory factory = Mock(ImplementationFactory)
+		expect:
+			new ImplementationFinder( factory ).provider() == factory
+	}
+
 	def "FindRaw"() {
 		given:
-			def nullFactory = new ImplementationFactory() {
-				@Override
-				ImplementationLoader loader() {
-					return null
-				}
-
-				@Override
-				ImplementationReader reader() {
-					return null
-				}
-			}
-			def nullLoader = new ImplementationLoader() {
-				@Override
-				def <I> Class<? extends I> loadImplementation( ImplementationInformation info, Class<I> targetType ) {
-					return null
-				}
-			}
-			def nullFinder = new ImplementationFinder( nullFactory )
-			def dummyInfo = new ImplementationInformation.Impl( "com.example.MyInterface", 0 )
-			def dummyIter = Arrays.asList( dummyInfo,dummyInfo,dummyInfo ).iterator()
-			def dummyFactory = new ImplementationFactoryImpl( nullLoader, new ImplementationReader() {
-				@Override
-				def <I> Iterator<ImplementationInformation> readImplementationCollection( Class<I> interfase ) {
-					return dummyIter;
-				}
-			} )
-			def dummyFinder = new ImplementationFinder( dummyFactory )
-
+			def nullFinder = new ImplementationFinder( Mock(ImplementationFactory) )
+			def iter = [].iterator()
+			def factory = new ImplementationFactoryImpl( Mock(ImplementationLoader), { iter } as ImplementationReader )
+			def finder = new ImplementationFinder( factory )
 		when:
 			nullFinder.findRaw( null )
 		then:
+			0 * nullFinder.findImplementationCollection( _ )
 			thrown( NullPointerException )
 		expect:
-			dummyFinder.findRaw( null ) == dummyIter
+			finder.findRaw( null ) == iter
 	}
 }

@@ -42,6 +42,15 @@ public class ImplementationFinder {
 	}
 
 	/**
+	 * Returns the provider given to the finder at construction.
+	 *
+	 * @return the provider.
+	 */
+	public ImplementationFactory provider() {
+		return this.provider;
+	}
+
+	/**
 	 * Finds the implementations for the given "interface".
 	 *
 	 * @param interfase the interface class object.
