@@ -16,6 +16,7 @@
 package se.toxbee.fimpl.predicates;
 
 import se.toxbee.fimpl.ImplementationResultSet;
+import se.toxbee.fimpl.Util;
 import se.toxbee.fimpl.common.ImplementationInformation;
 import se.toxbee.fimpl.ImplementationLoader;
 
@@ -35,10 +36,10 @@ public class InterfacePredicate<I> implements Predicate<I> {
 	/**
 	 * Constructs the predicate with the "interface" class object we're checking for assignability.
 	 *
-	 * @param interfase the interface class object.
+	 * @param interfase the interface class object, not null.
 	 */
 	public InterfacePredicate( Class<?> interfase ) {
-		this.interfase = interfase;
+		this.interfase = Util.guardNull( interfase );
 	}
 
 	/**
@@ -55,7 +56,6 @@ public class InterfacePredicate<I> implements Predicate<I> {
 		// Get the class we are testing.
 		ImplementationLoader loader = set.provider().loader();
 		Class<? extends I> clazz = loader.loadImplementation( info, set.interfase() );
-
-		return clazz.isAssignableFrom( this.interfase );
+		return this.interfase.isAssignableFrom( clazz );
 	}
 }

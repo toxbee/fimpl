@@ -15,8 +15,8 @@
  */
 package se.toxbee.fimpl.impl;
 
-import se.toxbee.fimpl.common.ImplementationInformation;
 import se.toxbee.fimpl.ImplementationLoader;
+import se.toxbee.fimpl.common.ImplementationInformation;
 
 /**
  * StandardClassLoader uses a ClassLoader to load a class.
@@ -33,7 +33,7 @@ public class StandardClassLoader implements ImplementationLoader {
 	 * Constructs the loader with the context class loader of the current thread.
 	 */
 	public StandardClassLoader() {
-		this( Thread.currentThread().getContextClassLoader() );
+		this( null );
 	}
 
 	/**
@@ -48,23 +48,17 @@ public class StandardClassLoader implements ImplementationLoader {
 	/**
 	 * Sets the ClassLoader to use.
 	 *
-	 * @param cl the loader.
+	 * @param cl the loader, if null, the context class loader of the current thread is used.
 	 */
 	public void setClassloader( ClassLoader cl ) {
-		if ( cl == null ) {
-			throw new IllegalArgumentException( "ClassLoader given was null." );
-		}
-		this.classLoader = cl;
+		this.classLoader = cl == null ? Thread.currentThread().getContextClassLoader() : cl;
 	}
 
 	@Override
 	public <T> Class<? extends T> loadImplementation( ImplementationInformation info, Class<T> targetType ) {
-		// Get fully qualified name of class.
-		String FQN = info.getImplementorClass();
-
 		// Load the class, return null if class ain't found or of wrong type.
 		try {
-			return this.classLoader.loadClass( FQN ).asSubclass( targetType );
+			return this.classLoader.loadClass( info.getImplementorClass() ).asSubclass( targetType );
 		} catch ( ClassNotFoundException e ) {
 		} catch ( ClassCastException e ) {
 		}

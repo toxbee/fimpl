@@ -19,12 +19,6 @@ package se.toxbee.fimpl.common
 import spock.lang.Shared
 import spock.lang.Specification
 
-/**
- *
- * @author Centril < twingoow @ gmail.com >  / Mazdak Farrokhzad.
- * @version 1.0
- * @since Feb , 03, 2014
- */
 class ImplTest extends Specification {
 	def  @Shared interfase = "com.example.MyInterface"
 

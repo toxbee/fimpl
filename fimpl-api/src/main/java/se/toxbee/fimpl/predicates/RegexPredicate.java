@@ -42,7 +42,7 @@ public class RegexPredicate<I> implements Predicate<I> {
 	 * @param pattern the pattern.
 	 */
 	public RegexPredicate( PredicateInputTransformer<I, ? extends CharSequence> transformer, Pattern pattern ) {
-		this.pattern = pattern;
+		this.pattern = guardNull( pattern );
 		this.transformer = guardNull( transformer );
 	}
 
