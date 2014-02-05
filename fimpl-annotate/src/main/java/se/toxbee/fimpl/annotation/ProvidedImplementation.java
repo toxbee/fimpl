@@ -23,12 +23,19 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * <p>ProvidedImplementation indicates that the annotated class is an implementation
- * of should be listed into the <tt>META-INF/services/{interface.getName()}</tt>.</p>
+ * <p>ProvidedImplementation indicates that the annotated<br/>
+ * <strong>concrete</strong> class is an implementation for<br/>
+ * of should be listed into the <tt>META-INF/services/{interface.getName()}</tt><br/>
+ * or similar constructions.</p>
  *
- * <p>{interface} is normally = {@link #value()}.<br/>
- * If {@link #value()} == void.class then the class for which this annotation
- * is placed only has one base class or interface then that is the {interface}.</p>
+ * <p>{interface} is normally = {@link #implementationFor()}.<br/>
+ * If {@link #implementationFor()} == {@link Void#TYPE},<br/>
+ * then the class for which this annotation is placed only has<br/>
+ * one base class or interface then that is the {interface}.</p>
+ *
+ * <p>Note that {@link #type()}'s default value, an empty String,<br/>
+ * should be read as null when processing the annotation.<br/>
+ * This shortcoming's due to null not being a valid default annotation value.</p>
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0
@@ -38,9 +45,32 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Documented
 @Target(TYPE)
 public @interface ProvidedImplementation {
-    Class value() default void.class;
+	/**
+	 * <p>The "class/interface" (henceforth "interface")<br/>
+	 * that the annotated class is an implementation for.</p>
+	 *
+	 * <p>If {@link #implementationFor()} == {@link Void#TYPE},<br/>
+	 * then the class for which this annotation is placed only<br/>
+	 * has one base class or interface then that is the {interface}.</p>
+	 *
+	 * @return the "interface" that the annotated is an implementation of.
+	 */
+    Class implementationFor() default void.class;
 
+	/**
+	 * The priority of the implementation in the set of implementations.<br/>
+	 * The {@link Integer#MAX_VALUE}, {@link Integer#MIN_VALUE} has the highest
+	 * and lowest priorities respectively.
+	 *
+	 * @return the priority.
+	 */
 	int priority() default 0;
 
+	/**
+	 * The type of the implementation - not guaranteed to be a unique value.<br/>
+	 * An empty value should be understood as "null" type.
+	 *
+	 * @return the type.
+	 */
 	String type() default "";
 }
