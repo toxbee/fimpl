@@ -15,31 +15,19 @@
  */
 
 package se.toxbee.fimpl.impl
-
 import se.toxbee.fimpl.ImplementationLoader
 import se.toxbee.fimpl.ImplementationReader
-import se.toxbee.fimpl.common.ImplementationInformation
 import spock.lang.Specification
 
 class ImplementationFactoryImplTest extends Specification {
 	def "Ctor"() {
 		given:
-			def l = new ImplementationLoader() {
-				@Override
-				def <I> Class<? extends I> loadImplementation( ImplementationInformation info, Class<I> targetType ) {
-					return null
-				}
-			}
-			def r = new ImplementationReader() {
-				@Override
-				def <I> Iterator<ImplementationInformation> readImplementationCollection( Class<I> interfase ) {
-					return null
-				}
-			}
+			def l = Mock(ImplementationLoader)
+			def r = Mock(ImplementationReader)
 			def i = new ImplementationFactoryImpl(l, r)
-			assert i.loader() == l
-			assert i.reader() == r
-
+		expect:
+			i.loader() == l
+			i.reader() == r
 		when:
 			new ImplementationFactoryImpl(l, null)
 		then:

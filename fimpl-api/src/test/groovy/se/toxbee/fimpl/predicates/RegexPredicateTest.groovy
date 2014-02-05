@@ -48,7 +48,8 @@ class RegexPredicateTest extends Specification {
 		expect:
 			pred.match( new ImplementationInformation.Impl( name, 0, type ), null, false ) == match
 		where:
-			type << ["text/javascript", "image/gif"]
-			match << [true, false]
+			type                |   match
+			"text/javascript"   |   true
+			"image/gif"         |   false
 	}
 }

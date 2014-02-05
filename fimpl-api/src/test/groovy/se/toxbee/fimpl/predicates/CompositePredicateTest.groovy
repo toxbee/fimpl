@@ -26,25 +26,29 @@ import spock.lang.Specification
  * @since Feb , 03, 2014
  */
 class CompositePredicateTest extends Specification {
-	static class cp<I> extends CompositePredicate<I, Boolean> {
+	static class cp extends CompositePredicate<Object, Boolean> {
 		cp( Boolean... matchers ) {
 			super( matchers )
 		}
 
 		@Override
-		protected boolean match( Boolean matcher, ImplementationInformation info, ImplementationResultSet<I, ?> set ) {
+		protected boolean match( Boolean matcher, ImplementationInformation info, ImplementationResultSet<Object, ?> set ) {
 			return matcher
 		}
 	}
 
 	def "Match"() {
+		given:
+			def info = Mock(ImplementationInformation)
+			def set = Mock(ImplementationResultSet)
+			def pred = new cp( (Boolean[]) matchers );
 		expect:
-			(pred as Predicate<?>).match( null, null, true ) == any
-			(pred as Predicate<?>).match( null, null, false ) == all
-
+			pred.match( info, set, true )   == any
+			pred.match( info, set, false )  == all
 		where:
-			pred << [new cp( true, true, true ), new cp( true, true, false ), new cp( false, false, false )]
-			any << [true, true, false]
-			all << [true, false, false]
+			matchers                |   any     |   all
+			[true, true, true]      |   true    |   true
+			[true, true, false]     |   true    |   false
+			[false, false, false]   |   false   |   false
 	}
 }

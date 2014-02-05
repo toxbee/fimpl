@@ -24,14 +24,9 @@ class StandardClassLoaderTest extends Specification {
 		given:
 			def l = new StandardClassLoader()
 			def ctxcl = Thread.currentThread().getContextClassLoader()
-			def mycl = new ClassLoader() {
-				@Override
-				Class<?> loadClass( String name ) throws ClassNotFoundException {
-					return super.loadClass( name )
-				}
-			}
+			def mycl = Mock( ClassLoader )
 		expect:
-			l.classLoader == ctxcl
+			l.getClassLoader() == ctxcl
 		when:
 			l.setClassloader( null )
 		then:
@@ -47,11 +42,13 @@ class StandardClassLoaderTest extends Specification {
 
 	def "LoadImplementation"() {
 		given:
-			def l = new StandardClassLoader()
+			def loader = new StandardClassLoader()
 		expect:
-			l.loadImplementation( new ImplementationInformation.Impl( w, 0 ), iface.class ) == t
+			loader.loadImplementation( new ImplementationInformation.Impl( clazzName ), iface.class ) == expected
 		where:
-			w << [clazz.class.getName(), Object.class.getName(), "non-existent"]
-			t << [clazz.class, null, null]
+			clazzName               |   expected
+			clazz.class.getName()   |   clazz.class
+			Object.class.getName()  |   null
+			"non-existent"          |   null
 	}
 }

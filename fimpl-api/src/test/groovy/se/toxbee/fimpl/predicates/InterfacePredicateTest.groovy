@@ -42,20 +42,14 @@ class InterfacePredicateTest extends Specification {
 
 	def "Match"() {
 		given:
-			def dummyFactory = new ImplementationFactoryImpl( new StandardClassLoader(), new ImplementationReader() {
-				@Override
-				def <I> Iterator<ImplementationInformation> readImplementationCollection( Class<I> interfase ) {
-					return null;
-				}
-			} )
+			def dummyFactory = new ImplementationFactoryImpl( new StandardClassLoader(), Mock(ImplementationReader) )
 			def set = new ImplementationResultSet.Impl<iface1>( dummyFactory, iface1.class, null )
 			def pred = new InterfacePredicate<iface1>( iface2.class )
-
 		expect:
-			pred.match( new ImplementationInformation.Impl( info.getName(), 0 ), set, false ) == ex
-
+			pred.match( new ImplementationInformation.Impl( info.getName() ), set, false ) == match
 		where:
-			info << [impltrue.class, implfalse.class ]
-			ex << [true, false]
+			info            |   match
+			impltrue.class  |   true
+			implfalse.class |   false
 	}
 }

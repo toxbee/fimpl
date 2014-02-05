@@ -100,7 +100,7 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	 * @param iter the iterator add to list, doesn't actually check for null when adding.
 	 * @return the given set.
 	 */
-	protected Set<ImplementationInformation> fillSet( Set<ImplementationInformation> set, Iterator<ImplementationInformation> iter ) {
+	protected <T> Set<T> fillSet( Set<T> set, Iterator<T> iter ) {
 		if ( iter != null ) {
 			while ( iter.hasNext() ) {
 				set.add( iter.next() );
@@ -296,6 +296,16 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	/**
 	 * Joins this set with another one.
 	 *
+	 * @param rhs the other set.
+	 * @return my()
+	 */
+	public R join( Iterable<ImplementationInformation> rhs ) {
+		return this.join( rhs.iterator() );
+	}
+
+	/**
+	 * Joins this set with another one.
+	 *
 	 * @param rhs the other "set".
 	 * @return my()
 	 */
@@ -453,52 +463,44 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	 * Filters the set with a given set of matcher predicates.
 	 * All elements that match ANY of the given predicates are RETAINED.
 	 *
-	 * Equivalent of filterAny( true, predicates )
-	 *
 	 * @param predicates the predicates.
 	 * @return my()
 	 */
 	public R retainAny( Predicate<I>... predicates ) {
-		return this.filterAny( false, predicates );
+		return this.filter( false, false, predicates );
 	}
 
 	/**
 	 * Filters the set with a given set of matcher predicates.
 	 * All elements that match ANY of the given predicates are REMOVED.
 	 *
-	 * Equivalent of filterAny( true, predicates )
-	 *
 	 * @param predicates the predicates.
 	 * @return my()
 	 */
 	public R removeAny( Predicate<I>... predicates ) {
-		return this.filterAny( true, predicates );
+		return this.filter( true, false, predicates );
 	}
 
 	/**
 	 * Filters the set with a given set of matcher predicates.
 	 * All elements that match ALL of the given predicates are RETAINED.
 	 *
-	 * Equivalent of filterAll( false, predicates )
-	 *
 	 * @param predicates the predicates.
 	 * @return my()
 	 */
 	public R retainAll( Predicate<I>... predicates ) {
-		return this.filterAll( false, predicates );
+		return this.filter( false, true, predicates );
 	}
 
 	/**
 	 * Filters the set with a given set of matcher predicates.
 	 * All elements that match ALL of the given predicates are REMOVED.
 	 *
-	 * Equivalent of filterAll( true, predicates )
-	 *
 	 * @param predicates the predicates.
 	 * @return my()
 	 */
 	public R removeAll( Predicate<I>... predicates ) {
-		return this.filterAll( true, predicates );
+		return this.filter( true, true, predicates );
 	}
 
 	/**
@@ -506,73 +508,44 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	 * Core filter method.
 	 *
 	 * @param removeOn for which matcher result to keep, true = remove, false = retain
+	 * @param allMode using all mode, or any mode.
 	 * @param predicates the predicates.
 	 * @return my()
 	 */
-	public R filterAny( boolean removeOn, Predicate<I>... predicates ) {
+	protected R filter( boolean removeOn, boolean allMode, Predicate<I>... predicates ) {
 		// Try to recover with last predicates.
 		predicates = this.recoverWithPending( predicates );
 
 		if ( predicates.length > 0 ) {
-			Iterator<ImplementationInformation> iter = this.set.iterator();
-
-			outer:
-			while( iter.hasNext() ) {
-				ImplementationInformation info = iter.next();
-
-				for ( Predicate<I> p : predicates ) {
-					if ( this.isEmpty() ) {
-						break outer;
-					}
-
-					if ( p.match( info, this, true ) == removeOn ) {
-						iter.remove();
-						break;
-					}
-				}
-			}
+			this.filterInner( removeOn, allMode, predicates );
 		}
 
 		return this.consumeIf();
 	}
 
-	/**
-	 * Filters the set with a given set of matcher predicates.
-	 * Core filter method.
-	 *
-	 * @param removeOn for which matcher result to keep, true = remove, false = retain
-	 * @param predicates the predicates.
-	 * @return my()
-	 */
-	public R filterAll( boolean removeOn, Predicate<I>... predicates ) {
-		// Try to recover with last predicates.
-		predicates = this.recoverWithPending( predicates );
+	protected void filterInner( boolean removeOn, boolean allMode, Predicate<I>[] predicates ) {
+		boolean anyMode = !allMode;
+		Iterator<ImplementationInformation> iter = this.set.iterator();
 
-		if ( predicates.length > 0 ) {
-			this.use( predicates );
+		while( iter.hasNext() ) {
+			ImplementationInformation info = iter.next();
 
-			boolean keepOn = !removeOn;
-
-			Iterator<ImplementationInformation> iter = this.set.iterator();
-
-			outer:
-			while( iter.hasNext() ) {
-				ImplementationInformation info = iter.next();
-
-				for ( Predicate<I> p : predicates ) {
-					if ( this.isEmpty() ) {
-						break outer;
-					}
-
-					if ( p.match( info, this, false ) == keepOn )  {
-						continue outer;
-					}
+			boolean remove = allMode;
+			for ( Predicate<I> p : predicates ) {
+				if ( this.isEmpty() ) {
+					return;
 				}
+
+				if ( p.match( info, this, anyMode ) == anyMode )  {
+					remove = anyMode;
+					break;
+				}
+			}
+
+			if ( remove == removeOn ) {
 				iter.remove();
 			}
 		}
-
-		return this.consumeIf();
 	}
 
 	/* --------------------------------------------

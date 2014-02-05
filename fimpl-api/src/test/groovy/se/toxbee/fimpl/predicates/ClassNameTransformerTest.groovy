@@ -23,8 +23,10 @@ class ClassNameTransformerTest extends Specification {
 	def "TransformForPredicate"() {
 		given:
 			def transformer = new ClassNameTransformer()
+			ImplementationInformation info = Mock()
+			1 * info.getImplementorClass() >> clazz.getName()
 		expect:
-			transformer.transformForPredicate( new ImplementationInformation.Impl( clazz.getName(), 0 ), null ) == clazz.getName()
+			transformer.transformForPredicate( info, null ) == clazz.getName()
 		where:
 			clazz << [Object.class, String.class, Iterator.class]
 	}

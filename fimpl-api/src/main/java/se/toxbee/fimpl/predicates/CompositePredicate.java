@@ -52,14 +52,14 @@ public abstract class CompositePredicate<I, A> implements Predicate<I> {
 	@Override
 	public boolean match( ImplementationInformation info, ImplementationResultSet<I, ?> set, boolean anyMode ) {
 		if ( anyMode ) {
-			for ( A m : this.matchers ) {
+			for ( A m : this.matchers() ) {
 				if ( this.match( m, info, set ) ) {
 					return true;
 				}
 			}
 			return false;
 		} else {
-			for ( A m : this.matchers ) {
+			for ( A m : this.matchers() ) {
 				if ( !this.match( m, info, set ) ) {
 					return false;
 				}

@@ -54,6 +54,15 @@ public class StandardClassLoader implements ImplementationLoader {
 		this.classLoader = cl == null ? Thread.currentThread().getContextClassLoader() : cl;
 	}
 
+	/**
+	 * Returns the currently used ClassLoader.
+	 *
+	 * @return the ClassLoader.
+	 */
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
+	}
+
 	@Override
 	public <T> Class<? extends T> loadImplementation( ImplementationInformation info, Class<T> targetType ) {
 		// Load the class, return null if class ain't found or of wrong type.
