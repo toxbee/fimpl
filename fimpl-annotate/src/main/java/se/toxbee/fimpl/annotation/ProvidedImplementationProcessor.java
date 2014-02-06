@@ -221,7 +221,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	private TypeElement getContract( TypeElement type, ProvidedImplementation pi ) {
 		if ( isConcrete( type ) ) {
 			try {
-				pi.implementing();
+				pi.of();
 				throw new AssertionError( "ShouldNeverHappenException" );
 			} catch ( MirroredTypeException e ) {
 				return readContract( type, e.getTypeMirror() );

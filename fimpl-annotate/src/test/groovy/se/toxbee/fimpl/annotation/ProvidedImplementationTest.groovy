@@ -38,7 +38,7 @@ class ProvidedImplementationTest extends Specification {
 			ProvidedImplementationDouble pi = getPI( default_annotated )
 		expect:
 			pi != null
-			pi.implementing() == void.class
+			pi.of() == void.class
 			pi.priority() == 0
 			pi.type() == ""
 	}
