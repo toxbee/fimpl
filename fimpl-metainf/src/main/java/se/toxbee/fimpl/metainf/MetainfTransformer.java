@@ -104,7 +104,7 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 	}
 
 	private static boolean addInfo( int r, Object[] data, List<ImplementationInformation> list ) {
-		list.add( new Impl( (String) data[0], (Integer) data[1], (String) data[2], data[3] ) );
+		list.add( new Impl( data ) );
 		return r != -1;
 	}
 
