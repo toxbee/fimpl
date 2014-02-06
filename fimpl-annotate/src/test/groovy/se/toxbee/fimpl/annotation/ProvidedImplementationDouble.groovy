@@ -13,49 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.toxbee.fimpl.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package se.toxbee.fimpl.annotation
+import java.lang.annotation.Documented
+import java.lang.annotation.Retention
+import java.lang.annotation.Target
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
+import static java.lang.annotation.ElementType.TYPE
+import static java.lang.annotation.RetentionPolicy.RUNTIME
 /**
- * <p>ProvidedImplementation indicates that the annotated<br/>
- * <strong>concrete</strong> type is an implementation for<br/>
- * of should be listed into the <tt>META-INF/services/{interface.getName()}</tt><br/>
- * or similar constructions.</p>
- *
- * <p>{interface} is normally = {@link #implementationFor()}.<br/>
- * If {@link #implementationFor()} == {@link Void#TYPE},<br/>
- * then the type for which this annotation is placed only has<br/>
- * one base class or interface then that is the {interface}.</p>
- *
- * <p>Note that {@link #type()}'s default value, an empty String,<br/>
- * should be read as null when processing the annotation.<br/>
- * This shortcoming's due to null not being a valid default annotation value.</p>
+ * Test double for {@link se.toxbee.fimpl.annotation.ProvidedImplementation}.<br/>
+ * Using {@link java.lang.annotation.RetentionPolicy#RUNTIME} instead.
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0
- * @since Jan, 25, 2014
+ * @since Feb, 5, 2014
  */
-@Retention(SOURCE)
+@Retention(RUNTIME)
 @Documented
 @Target(TYPE)
-public @interface ProvidedImplementation {
+public @interface ProvidedImplementationDouble {
 	/**
 	 * <p>The "class/interface" (henceforth "interface")<br/>
 	 * that the annotated class is an implementation for.</p>
 	 *
 	 * <p>If {@link #implementationFor()} == {@link Void#TYPE},<br/>
-	 * then the type for which this annotation is placed only<br/>
+	 * then the class for which this annotation is placed only<br/>
 	 * has one base class or interface then that is the {interface}.</p>
 	 *
 	 * @return the "interface" that the annotated is an implementation of.
 	 */
-    Class implementationFor() default void.class;
+	Class implementationFor() default void.class;
 
 	/**
 	 * The priority of the implementation in the set of implementations.<br/>
