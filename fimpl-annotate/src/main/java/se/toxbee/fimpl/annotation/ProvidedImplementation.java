@@ -28,8 +28,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * of should be listed into the <tt>META-INF/services/{interface.getName()}</tt><br/>
  * or similar constructions.</p>
  *
- * <p>{interface} is normally = {@link #implementationFor()}.<br/>
- * If {@link #implementationFor()} == {@link Void#TYPE},<br/>
+ * <p>{interface} is normally = {@link #implementing()}.<br/>
+ * If {@link #implementing()} == {@link Void#TYPE},<br/>
  * then the type for which this annotation is placed only has<br/>
  * one base class or interface then that is the {interface}.</p>
  *
@@ -49,13 +49,13 @@ public @interface ProvidedImplementation {
 	 * <p>The "class/interface" (henceforth "interface")<br/>
 	 * that the annotated class is an implementation for.</p>
 	 *
-	 * <p>If {@link #implementationFor()} == {@link Void#TYPE},<br/>
+	 * <p>If {@link #implementing()} == {@link Void#TYPE},<br/>
 	 * then the type for which this annotation is placed only<br/>
 	 * has one base class or interface then that is the {interface}.</p>
 	 *
 	 * @return the "interface" that the annotated is an implementation of.
 	 */
-    Class implementationFor() default void.class;
+    Class implementing() default void.class;
 
 	/**
 	 * The priority of the implementation in the set of implementations.<br/>
