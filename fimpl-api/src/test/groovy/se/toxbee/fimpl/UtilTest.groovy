@@ -17,8 +17,9 @@
 package se.toxbee.fimpl
 
 import spock.lang.Shared
+import spock.lang.Specification
 
-class UtilTest extends spock.lang.Specification {
+class UtilTest extends Specification {
 	def @Shared obj = new Object()
 
 	def "Equal"() {
