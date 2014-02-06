@@ -43,16 +43,22 @@ class ImplTest extends Specification {
 			e << [-1, 1, 0, Integer.MAX_VALUE, Integer.MIN_VALUE]
 	}
 
-	def "GetType"() {
-		given:
-			def info = new ImplementationInformation.Impl(interfase, 0)
-			def info2 = new ImplementationInformation.Impl(interfase, 0, null)
-			def info3 = new ImplementationInformation.Impl(interfase, 0, d)
+	def "GetType_1"() {
 		expect:
-			info.getType() == info2.getType()
-			info3.getType() == d
+			new ImplementationInformation.Impl(interfase, 0).getType() == null
+	}
+
+	def "GetType_2"() {
+		given:
+			def info = new ImplementationInformation.Impl( interfase, 0, data )
+		expect:
+			info.getType() == expected
 		where:
-			d << ["typeA", "typeB"]
+			data    | expected
+			null    | null
+			""      | null
+			"typeA" | "typeA"
+			"typeB" | "typeB"
 	}
 
 	def "GetExtras"() {

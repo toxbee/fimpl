@@ -118,6 +118,36 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 		protected final Object extras;
 
 		/**
+		 * Constructs info from a series of strings.
+		 * Any length >= 1 is allowed.
+		 * Array layout: [implementorClass, (priority, (type, (extras)))]
+		 *
+		 * @param strings the array of string data.
+		 * @return null if strings is null or empty.
+		 */
+		public static Impl from( String... strings ) {
+			if ( strings == null && strings.length == 0 ) {
+				return null;
+			}
+
+			Object[] data = new Object[4];
+
+			switch ( strings.length ) {
+				default:
+				case 3:
+					data[3] = strings[3];
+				case 2:
+					data[2] = strings[2];
+				case 1:
+					data[1] = Integer.parseInt( strings[1] );
+				case 0:
+					data[0] = strings[0];
+			}
+
+			return new Impl( data );
+		}
+
+		/**
 		 * Constructs the information entity with implementorClass, 0 as priority and no type or extras.
 		 *
 		 * @param implementorClass the relative or fully qualified name of the implementing class.
@@ -159,8 +189,17 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 			super( implementorClass );
 			this.implementorClass = implementorClass;
 			this.priority = priority;
-			this.type = type;
+			this.type = type == null ? null : (type.equals( "" ) ? null : type);
 			this.extras = extras;
+		}
+
+		/**
+		 * Constructs the information entity with [implementorClass, priority, type, extras].
+		 *
+		 * @param data the data array to construct from.
+		 */
+		public Impl( Object[] data ) {
+			this( (String) data[0], (Integer) data[1], (String) data[2], data[3] );
 		}
 
 		/**
