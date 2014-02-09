@@ -15,7 +15,6 @@
  */
 package se.toxbee.fimpl.predicates;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import se.toxbee.fimpl.ImplementationResultSet;
@@ -58,7 +57,6 @@ public class RegexPredicate<I> implements Predicate<I> {
 	@Override
 	public boolean match( ImplementationInformation info, ImplementationResultSet<I, ?> set, boolean anyMode ) {
 		CharSequence input = this.transformer.transformForPredicate( info, set );
-		Matcher matcher = this.pattern.matcher( input );
-		return matcher.matches();
+		return input != null && this.pattern.matcher( input ).matches();
 	}
 }

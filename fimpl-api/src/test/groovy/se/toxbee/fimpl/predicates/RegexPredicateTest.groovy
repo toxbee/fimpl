@@ -51,5 +51,6 @@ class RegexPredicateTest extends Specification {
 			type                |   match
 			"text/javascript"   |   true
 			"image/gif"         |   false
+			null                |   false
 	}
 }
