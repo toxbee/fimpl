@@ -199,7 +199,7 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 		 * @param data the data array to construct from.
 		 */
 		public Impl( Object[] data ) {
-			this( (String) data[0], (Integer) data[1], (String) data[2], data[3] );
+			this( (String) data[0], (Integer) (data[1] == null ? 0 : data[1]), (String) data[2], data[3] );
 		}
 
 		/**
