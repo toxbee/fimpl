@@ -20,12 +20,7 @@ import se.toxbee.fimpl.Util
 import se.toxbee.fimpl.common.ImplementationInformation
 import spock.lang.Shared
 import spock.lang.Specification
-/**
- *
- * @author Centril < twingoow @ gmail.com >  / Mazdak Farrokhzad.
- * @version 1.0
- * @since Feb , 09, 2014
- */
+
 class MetainfTransformerTest extends Specification {
 	def @Shared i_1 = info( "clazz", 0, "type", "extra" )
 	def @Shared i_2 = info( "clazz", 0, null, "extra" )
