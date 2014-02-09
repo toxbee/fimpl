@@ -65,7 +65,7 @@ import se.toxbee.fimpl.common.ImplementationInformation.Impl;
  * @version 1.0
  * @since Feb, 05, 2014
  */
-@SupportedOptions({"meta-location", "meta-inf-only"})
+@SupportedOptions({"meta.location", "meta.inf.only"})
 @SupportedSourceVersion( SourceVersion.RELEASE_7 )
 public class ProvidedImplementationProcessor extends AbstractProcessor {
 	/* ----------------------------------------------
@@ -115,12 +115,12 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	private void readOptions() {
 		Map<String, String> opts = this.processingEnv.getOptions();
 
-		this.metaLocation = opts.get( "meta-location" );
+		this.metaLocation = opts.get( "meta.location" );
 		if ( this.metaLocation == null ) {
 			this.metaLocation = META_LOCATION;
 		}
 
-		String metaOnly = opts.get( "meta-inf-only" );
+		String metaOnly = opts.get( "meta.inf.only" );
 		this.metaInfOnly = metaOnly == null ? METAINF_ONLY : Boolean.parseBoolean( metaOnly );
 	}
 
