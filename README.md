@@ -57,7 +57,7 @@ If you use gradle, this is done when you assemble your project.
 ### Finding implementations
 
 If you use the __fimpl-metainf__ bindings for __fimpl-api__ you can retrieve the
-first implementation that honors `type = "image/png"`, like so:
+first implementation that honors `type = "image/png"`:
 
 ```java
 ImplementationFactory factory = new ImplementationFactoryImpl(new MetainfReader());
@@ -67,9 +67,25 @@ Class<? extends ImageViewer> first = found.type( "image/png" ).first();
 // Do something with clazz.
 ```
 
+`ImplementationResultSet` uses a fluent interface and provides many neat querying capabilities.
+
 ### Installation
 
-todo
+With gradle, you can add dependencies like so:
+
+```groovy
+repositories {
+    maven {
+        url 'https://github.com/toxbee/mvn-repo/raw/master/maven-deploy'
+    }
+    mavenCentral()
+}
+
+dependencies {
+  compile 'se.toxbee.fimpl:fimpl-annotate-all:0.1' // for annotations
+  compile 'se.toxbee.fimpl:fimpl-metainf-all:0.1' // for meta-inf implementation of API.
+}
+```
 
 ## Why not [ServiceLoader](http://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html)?
 
