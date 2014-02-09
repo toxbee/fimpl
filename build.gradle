@@ -18,38 +18,24 @@ task wrapper( type: Wrapper ) {
 	gradleVersion = '1.10'
 }
 
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
+	}
+}
+
+task cleanMaven(type: Delete) { delete 'maven-deploy' }
+task cleanOutput(type: Delete) { delete 'classes' }
+
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'maven'
 
-	build.finalizedBy uploadArchives
-
-	group = "se.toxbee.fimpl"
-
-	uploadArchives {
-		def gitroscm = "https://github.com/toxbee/fimpl-core"
-
-		repositories.mavenDeployer {
-			repository( url: uri( "../maven-deploy" ) )
-			pom {
-				project {
-					inceptionYear '2014'
-					scm {
-						url "${gitroscm}";
-						connection "${gitroscm}";
-					}
-
-					licenses {
-						license {
-							name 'The Apache Software License, Version 2.0'
-							url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-							distribution 'repo'
-						}
-					}
-				}
-			}
-		}
-	}
+	task cleanAll(dependsOn: [clean, cleanMaven, cleanOutput]) {}
 
 	// Used for testing:
 	apply plugin: 'groovy'
@@ -62,29 +48,104 @@ subprojects {
 		testCompile 'org.objenesis:objenesis:1.1'
 		testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 	}
-}
 
-project( ':fimpl-common' ) {
+	group = "se.toxbee.fimpl"
 	version = '0.1'
+
+	build.finalizedBy uploadArchives
+	uploadArchives {
+		def gitroscm = "https://github.com/toxbee/fimpl-core"
+
+		repositories.mavenDeployer {
+			repository( url: uri( "../maven-deploy" ) )
+			pom {
+				project {
+					inceptionYear '2014'
+					scm {
+						url "${gitroscm}";
+						connection "${gitroscm}";
+					}
+					licenses {
+						license {
+							name 'The Apache Software License, Version 2.0'
+							url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+							distribution 'repo'
+						}
+					}
+				}
+			}
+
+			addFilter( 'std' ) { artifact, file ->
+				artifact.name == project.archivesBaseName
+			}
+			pom( 'std' ).artifactId = project.archivesBaseName
+		}
+	}
 }
 
-project( ':fimpl-annotate' ) {
+configure( subprojects.findAll { it.name != ':fimpl-common' } ) {
+	apply plugin: 'fatjar'
+	File stageDir = new File(project.buildDir.absolutePath + "/tmp/fatjar-stage")
+	project.tasks.withType( eu.appsatori.gradle.fatjar.tasks.PrepareFiles )
+	       .whenTaskAdded { eu.appsatori.gradle.fatjar.tasks.PrepareFiles prepareFiles ->
+		prepareFiles.conventionMapping.map( "classesDir" ) {
+			File ret = project.sourceSets.main.output.classesDir
+			ret?.exists() ? ret : null
+		}
+		prepareFiles.conventionMapping.map( "resourcesDir" ) {
+			File ret = project.sourceSets.main.output.resourcesDir
+			ret?.exists() ? ret : null
+		}
+		prepareFiles.conventionMapping.map( "compileClasspath" ) {
+			def excluded = []
+			project.logger.debug( "FatJar: Building compile classpath" )
+			def classpath = project.configurations.runtime.copyRecursive {
+				if ( !it.ext.has( 'fatJarExclude' ) || !it.ext.get( 'fatJarExclude' ) ) {
+					project.logger.debug( "FatJar: $it.group:$it.name is INCLUDED ($it)" )
+					return true
+				}
+				project.logger.debug( "FatJar: $it.group:$it.name:$it.version is EXCLUDED ($it)" )
+				excluded << it
+				false
+			}
+			for ( Dependency d in excluded ) {
+				classpath.exclude group: d.group, module: d.name
+			}
+			project.logger.debug( "FatJar: classpath contains following files - ${classpath.resolve()}" )
+			classpath
+		}
+		prepareFiles.conventionMapping.map( "stageDir" ) { stageDir }
+	}
+	task prepareFiles(type: eu.appsatori.gradle.fatjar.tasks.PrepareFiles, dependsOn: classes) {}
+
+	def allName = project.archivesBaseName + "-all"
+
+	task allJar (type: Jar, dependsOn: prepareFiles) {
+		baseName = allName
+		from stageDir
+	}
+
+	artifacts {
+		archives allJar
+	}
+
+	uploadArchives {
+		repositories.mavenDeployer {
+			addFilter( allName ) { artifact, file ->
+				artifact.name == allName && artifact.name != 'fimpl-common-all'
+			}
+		}
+	}
+}
+
+configure( [project(':fimpl-api'), project(':fimpl-annotate')] ) {
 	dependencies {
 		compile project( ':fimpl-common' )
 	}
-	version = '0.1'
-}
-
-project( ':fimpl-api' ) {
-	dependencies {
-		compile project( ':fimpl-common' )
-	}
-	version = '0.1'
 }
 
 project( ':fimpl-metainf' ) {
 	dependencies {
 		compile project( ':fimpl-api' )
 	}
-	version = '0.1'
 }
