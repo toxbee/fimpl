@@ -294,6 +294,16 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	}
 
 	/**
+	 * Joins this set with rhs.
+	 *
+	 * @param rhs the info.
+	 * @return my()
+	 */
+	public R join( ImplementationInformation rhs ) {
+		return this.join( Collections.singletonList( rhs ) );
+	}
+
+	/**
 	 * Joins this set with another one.
 	 *
 	 * @param rhs the other set.
