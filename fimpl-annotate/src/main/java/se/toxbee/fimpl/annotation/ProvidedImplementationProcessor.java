@@ -37,6 +37,7 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -64,6 +65,7 @@ import se.toxbee.fimpl.common.ImplementationInformation.Impl;
  * @version 1.0
  * @since Feb, 05, 2014
  */
+@SupportedOptions({"meta-location", "meta-inf-only"})
 @SupportedSourceVersion( SourceVersion.RELEASE_7 )
 public class ProvidedImplementationProcessor extends AbstractProcessor {
 	/* ----------------------------------------------
@@ -71,7 +73,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	 * ----------------------------------------------
 	 */
 
-	public static String LOCATION = "META-INF/services/";
+	public static String META_LOCATION = "META-INF/services/";
 	public static boolean METAINF_ONLY = false;
 
 	/* ----------------------------------------------
@@ -82,6 +84,8 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	private static final Class<ProvidedImplementation> ANNOTATION_CLAZZ = ProvidedImplementation.class;
 	private static final String ANNOTATION_TYPE = ANNOTATION_CLAZZ.getName();
 	private static final Charset CHARSET = Charset.forName( "UTF-8" );
+	private String metaLocation;
+	private boolean metaInfOnly;
 
 	@Override
 	public Set<String> getSupportedAnnotationTypes() {
@@ -101,9 +105,23 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	public synchronized void init( ProcessingEnvironment processingEnv ) {
 		super.init( processingEnv );
 
+		this.readOptions();
+
 		this.tabSplitter = Pattern.compile( "\t", Pattern.LITERAL );
 		this.util = this.processingEnv.getTypeUtils();
 		this.elements = this.processingEnv.getElementUtils();
+	}
+
+	private void readOptions() {
+		Map<String, String> opts = this.processingEnv.getOptions();
+
+		this.metaLocation = opts.get( "meta-location" );
+		if ( this.metaLocation == null ) {
+			this.metaLocation = META_LOCATION;
+		}
+
+		String metaOnly = opts.get( "meta-inf-only" );
+		this.metaInfOnly = metaOnly == null ? METAINF_ONLY : Boolean.parseBoolean( metaOnly );
 	}
 
 	@Override
@@ -127,6 +145,10 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		return true;
 	}
 
+	private String interfaseFile( String interfase ) {
+		return this.metaLocation + interfase;
+	}
+
 	private void readExistingData( Map<String, Set<ImplementationInformation>> store, Filer filer ) {
 		for ( Map.Entry<String, Set<ImplementationInformation>> e : store.entrySet() ) {
 			Set<ImplementationInformation> set = e.getValue();
@@ -134,13 +156,12 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 			BufferedReader reader = null;
 
 			try {
-				String interfase = e.getKey();
-				FileObject f = filer.getResource( StandardLocation.CLASS_OUTPUT, "", LOCATION + interfase );
+				FileObject f = filer.getResource( StandardLocation.CLASS_OUTPUT, "", this.interfaseFile( e.getKey() ) );
 				reader = new BufferedReader( new InputStreamReader( f.openInputStream(), CHARSET ) );
 
 				String line;
 				while ( (line = reader.readLine()) != null ) {
-					set.add( METAINF_ONLY ? new Impl( line ) : new Impl( tabSplitter.split( line, 4 ) ) );
+					set.add( this.metaInfOnly ? new Impl( line ) : new Impl( tabSplitter.split( line, 4 ) ) );
 				}
 			} catch ( FileNotFoundException x ) {
 				// doesn't exist
@@ -157,16 +178,34 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 			PrintWriter writer = null;
 
 			try {
-				String interfase = e.getKey();
-				msg().printMessage( Kind.NOTE, "Writing " + LOCATION + interfase );
-				FileObject f = filer.createResource( StandardLocation.CLASS_OUTPUT, "", LOCATION + interfase );
+				String interfaseFile = this.interfaseFile( e.getKey() );
+				msg().printMessage( Kind.NOTE, "Writing " + interfaseFile );
+				FileObject f = filer.createResource( StandardLocation.CLASS_OUTPUT, "", interfaseFile );
 				writer = new PrintWriter( new OutputStreamWriter( f.openOutputStream(), CHARSET ) );
 
-				for ( ImplementationInformation info : e.getValue() ) {
-					writer.println( METAINF_ONLY
-						?   info.getImplementorClass()
-						:   info.getImplementorClass() + '\t' + info.getPriority() + '\t' + info.getType()
-					);
+				if ( this.metaInfOnly ) {
+					for ( ImplementationInformation info : e.getValue() ) {
+						writer.println( info.getImplementorClass() );
+					}
+				} else {
+					for ( ImplementationInformation info : e.getValue() ) {
+						writer.print( info.getImplementorClass() );
+						int len = info.getType() != null ? 2 : (info.getPriority() != 0 ? 1 : 0);
+						for ( int i = 1; i <= 3; ++i ) {
+							writer.print( '\t' );
+
+							switch ( len ) {
+								case 1:
+									writer.print( info.getPriority() );
+									break;
+
+								case 2:
+									writer.print( info.getType() );
+									break;
+							}
+						}
+						writer.println();
+					}
 				}
 			} catch ( IOException x ) {
 				error( "Failed to write implementation definition files: " + x );
