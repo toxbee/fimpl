@@ -70,3 +70,11 @@ Class<? extends ImageViewer> first = found.type( "image/png" ).first();
 ### Installation
 
 todo
+
+## Why not [ServiceLoader](http://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html)?
+
+`ServiceLoader` has a few inherent problems, among them being:
+
+1. it's not agnostic as to where the meta-data comes from or how it is formatted.
+2. it always creates objects of the implementations.
+3. you can only use the default-constructor.
