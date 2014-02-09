@@ -24,7 +24,7 @@ import static se.toxbee.fimpl.Util.guardNull;
  * @since Jan, 23, 2014
  */
 public abstract class ImplementationResultSet<I, R extends ImplementationResultSet<I, R>> implements Iterable<ImplementationInformation> {
-	protected final static class Impl<I> extends ImplementationResultSet<I, Impl<I>> {
+	public final static class Impl<I> extends ImplementationResultSet<I, Impl<I>> {
 		protected Impl( ImplementationFactory p, Class<I> i, Iterator<ImplementationInformation> d ) {
 			super( p, i, d );
 		}

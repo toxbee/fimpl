@@ -32,6 +32,10 @@ public class ImplementationFactoryImpl implements ImplementationFactory {
 	protected ImplementationLoader loader;
 	protected ImplementationReader reader;
 
+	public ImplementationFactoryImpl( ImplementationReader reader ) {
+		this( new StandardClassLoader(), reader );
+	}
+
 	public ImplementationFactoryImpl( ImplementationLoader loader, ImplementationReader reader ) {
 		this.loader = guardNull( loader );
 		this.reader = guardNull( reader );
