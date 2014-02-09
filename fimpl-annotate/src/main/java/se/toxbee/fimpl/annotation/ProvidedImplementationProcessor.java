@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -73,6 +72,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	 */
 
 	public static String LOCATION = "META-INF/services/";
+	public static boolean METAINF_ONLY = false;
 
 	/* ----------------------------------------------
 	 * Private Config.
@@ -93,34 +93,6 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	 * ----------------------------------------------
 	 */
 
-	private static class StoreImpl implements ImplementationStore {
-		private final Map<String, Set<ImplementationInformation>> implementations;
-
-		public StoreImpl() {
-			this.implementations = new HashMap<String, Set<ImplementationInformation>>();
-		}
-
-		@Override
-		public void add( String interfase, ImplementationInformation info ) {
-			Set<ImplementationInformation> v = implementations.get( interfase );
-			if ( v == null ) {
-				implementations.put( interfase, v = new HashSet<ImplementationInformation>() );
-			}
-			v.add( info );
-		}
-
-		@Override
-		public Iterable<Entry<String, Set<ImplementationInformation>>> interfaces() {
-			return this.implementations.entrySet();
-		}
-	}
-
-	private static interface ImplementationStore {
-		public void add( String interfase, ImplementationInformation info );
-
-		public Iterable<Map.Entry<String, Set<ImplementationInformation>>> interfaces();
-	}
-
 	private Pattern tabSplitter;
 	private Types util;
 	private Elements elements;
@@ -140,7 +112,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 			return false;
 		}
 
-		ImplementationStore store = new StoreImpl();
+		Map<String, Set<ImplementationInformation>> store = new HashMap<String, Set<ImplementationInformation>>();
 
 		// Discover services from the current compilation sources
 		this.discoverImplementations( store, roundEnv );
@@ -155,20 +127,20 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		return true;
 	}
 
-	private void readExistingData( ImplementationStore store, Filer filer ) {
-		for ( Map.Entry<String, Set<ImplementationInformation>> e : store.interfaces() ) {
+	private void readExistingData( Map<String, Set<ImplementationInformation>> store, Filer filer ) {
+		for ( Map.Entry<String, Set<ImplementationInformation>> e : store.entrySet() ) {
 			Set<ImplementationInformation> set = e.getValue();
 
 			BufferedReader reader = null;
 
 			try {
-				String contract = e.getKey();
-				FileObject f = filer.getResource( StandardLocation.CLASS_OUTPUT, "", LOCATION + contract );
+				String interfase = e.getKey();
+				FileObject f = filer.getResource( StandardLocation.CLASS_OUTPUT, "", LOCATION + interfase );
 				reader = new BufferedReader( new InputStreamReader( f.openInputStream(), CHARSET ) );
 
 				String line;
 				while ( (line = reader.readLine()) != null ) {
-					set.add( new Impl( tabSplitter.split( line, 4 ) ) );
+					set.add( METAINF_ONLY ? new Impl( line ) : new Impl( tabSplitter.split( line, 4 ) ) );
 				}
 			} catch ( FileNotFoundException x ) {
 				// doesn't exist
@@ -180,18 +152,21 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		}
 	}
 
-	private void writeMetaData( ImplementationStore store, Filer filer ) {
-		for ( Map.Entry<String, Set<ImplementationInformation>> e : store.interfaces() ) {
+	private void writeMetaData( Map<String, Set<ImplementationInformation>> store, Filer filer ) {
+		for ( Map.Entry<String, Set<ImplementationInformation>> e : store.entrySet() ) {
 			PrintWriter writer = null;
 
 			try {
-				String contract = e.getKey();
-				msg().printMessage( Kind.NOTE, "Writing " + LOCATION + contract );
-				FileObject f = filer.createResource( StandardLocation.CLASS_OUTPUT, "", LOCATION + contract );
+				String interfase = e.getKey();
+				msg().printMessage( Kind.NOTE, "Writing " + LOCATION + interfase );
+				FileObject f = filer.createResource( StandardLocation.CLASS_OUTPUT, "", LOCATION + interfase );
 				writer = new PrintWriter( new OutputStreamWriter( f.openOutputStream(), CHARSET ) );
 
 				for ( ImplementationInformation info : e.getValue() ) {
-					writer.println( info.getImplementorClass() + '\t' + info.getPriority() + '\t' + info.getType() );
+					writer.println( METAINF_ONLY
+						?   info.getImplementorClass()
+						:   info.getImplementorClass() + '\t' + info.getPriority() + '\t' + info.getType()
+					);
 				}
 			} catch ( IOException x ) {
 				error( "Failed to write implementation definition files: " + x );
@@ -201,16 +176,24 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		}
 	}
 
-	private void discoverImplementations( ImplementationStore store, RoundEnvironment roundEnv ) {
+	private void discoverImplementations( Map<String, Set<ImplementationInformation>> store, RoundEnvironment roundEnv ) {
 		for ( Element e : roundEnv.getElementsAnnotatedWith( ProvidedImplementation.class ) ) {
 			ProvidedImplementation pi = e.getAnnotation( ProvidedImplementation.class );
 			TypeElement type = (TypeElement) e,
 						implemented = getContract( type, pi );
 
 			if ( implemented != null ) {
-				store.add( typeName( implemented ), new Impl( typeName( type ), pi.priority(), pi.type() ) );
+				getSet( store, typeName( implemented ) ).add( new Impl( typeName( type ), pi.priority(), pi.type() ) );
 			}
 		}
+	}
+
+	private Set<ImplementationInformation> getSet( Map<String, Set<ImplementationInformation>> store, String interfase ) {
+		Set<ImplementationInformation> v = store.get( interfase );
+		if ( v == null ) {
+			store.put( interfase, v = new HashSet<ImplementationInformation>() );
+		}
+		return v;
 	}
 
 	/* ----------------------------------------------
