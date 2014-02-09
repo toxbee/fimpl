@@ -6,7 +6,7 @@ fimpl - short for __F__ind __I__mplementation for the JVM is a unified
 way of providing and finding concrete implementations for an "interface".
 
 It is divided into 2 primary pieces - one which automatically writes data to
-locations like META-INF/services: __fimpl-annotate__.
+locations like `META-INF/services`: __fimpl-annotate__.
 The other important piece is __fimpl-api__ which is the querying tool.
 
 ## Richer meta-data
@@ -57,7 +57,7 @@ If you use gradle, this is done when you assemble your project.
 ### Finding implementations
 
 If you use the __fimpl-metainf__ bindings for __fimpl-api__ you can retrieve the
-first implementation that honors type = "image/png", like so:
+first implementation that honors `type = "image/png"`, like so:
 
 ```java
 ImplementationFactory factory = new ImplementationFactoryImpl(new MetainfReader());
