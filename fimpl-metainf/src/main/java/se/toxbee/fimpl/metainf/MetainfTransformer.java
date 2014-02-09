@@ -42,7 +42,7 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 
 	@Override
 	public Iterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in ) {
-		if ( !in.hasNext() ) {
+		if ( in == null || !in.hasNext() ) {
 			return null;
 		}
 
@@ -51,7 +51,8 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 
 		while ( in.hasNext() ) {
 			// Open stream & reader.
-			BufferedReader reader = new BufferedReader( new InputStreamReader( in.next(), Util.CHARSET ) );
+			Reader r = new InputStreamReader( in.next(), Util.CHARSET );
+			BufferedReader reader = new BufferedReader( r );
 			while ( readInfo( list, builder, reader ) );
 			close( reader );
 		}
@@ -59,56 +60,63 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 		return list.iterator();
 	}
 
-	private static boolean readInfo( List<ImplementationInformation> l, StringBuilder builder, Reader reader ) {
-		Object[] d = new Object[4];
+	static boolean readInfo( List<ImplementationInformation> l, StringBuilder builder, Reader reader ) {
 		int r;
 
 		// Read implementation class.
 		r = readToTab( builder, reader );
+
+		Object[] d = new Object[4];
 		d[0] = builder.toString();
-		if ( r == '\n' || r == -1 ) {
+		if ( r == '\n' ) {
+			return builder.length() <= 0 || addInfo( r, d, l );
+		}
+		if ( r == -1 ) {
 			return addInfo( r, d, l );
 		}
 
 		// Read priority.
 		r = readToTab( builder, reader );
-		d[1] = Integer.parseInt( builder.toString() );
-		if ( r == '\n' || r == -1 ) {
+		String prio =  builder.toString();
+		d[1] = prio.isEmpty() ? 0 : Integer.parseInt( prio );
+		if ( isComplete( r ) ) {
 			return addInfo( r, d, l );
 		}
 
 		// Read type.
 		r = readToTab( builder, reader );
 		d[2] = builder.toString();
-		if ( r == '\n' || r == -1 ) {
+		if ( isComplete( r ) ) {
 			return addInfo( r, d, l );
 		}
 
 		// Read extras.
 		r = readToTab( builder, reader );
 		d[3] = builder.toString();
-		if ( r == '\n' || r == -1 ) {
+		if ( isComplete( r ) ) {
 			return addInfo( r, d, l );
 		}
 
 		// Eat anything left before newline.
 		while ( true ) {
-			switch ( read( reader ) ) {
-				case -1:
-					return true;
-
-				case '\n':
-					return false;
+			if ( isComplete( r = read( reader ) ) ) {
+				return addInfo( r, d, l );
 			}
 		}
 	}
 
-	private static boolean addInfo( int r, Object[] data, List<ImplementationInformation> list ) {
-		list.add( new Impl( data ) );
+	static boolean isComplete( int r ) {
+		return r == '\n' || r == -1;
+	}
+
+	static boolean addInfo( int r, Object[] data, List<ImplementationInformation> list ) {
+		if ( data[0] != null ) {
+			list.add( new Impl( data ) );
+		}
 		return r != -1;
 	}
 
-	private static int readToTab( StringBuilder builder, Reader reader ) {
+	static int readToTab( StringBuilder builder, Reader reader ) {
 		if ( builder.length() > 0 ) {
 			builder.delete( 0, builder.length() );
 		}
@@ -124,9 +132,10 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 		}
 	}
 
-	private static int read( Reader reader ) {
+	static int read( Reader reader ) {
 		try {
-			return reader.read();
+			int i = reader.read();
+			return i;
 		} catch ( IOException e ) {
 			close( reader );
 			throw new RuntimeException( e );
