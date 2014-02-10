@@ -62,7 +62,7 @@ import se.toxbee.fimpl.common.ImplementationInformation.Impl;
  * with {@link se.toxbee.fimpl.annotation.ProvidedImplementation}
  *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
- * @version 1.0
+ * @version 1.0.1
  * @since Feb, 05, 2014
  */
 @SupportedOptions({"meta.location", "meta.inf.only"})
@@ -191,10 +191,10 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 					for ( ImplementationInformation info : e.getValue() ) {
 						writer.print( info.getImplementorClass() );
 						int len = info.getType() != null ? 2 : (info.getPriority() != 0 ? 1 : 0);
-						for ( int i = 1; i <= 3; ++i ) {
+						for ( int i = 1; i <= len; ++i ) {
 							writer.print( '\t' );
 
-							switch ( len ) {
+							switch ( i ) {
 								case 1:
 									writer.print( info.getPriority() );
 									break;
