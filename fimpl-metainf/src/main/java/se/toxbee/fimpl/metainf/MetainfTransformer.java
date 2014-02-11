@@ -40,8 +40,17 @@ import static se.toxbee.fimpl.common.Util.close;
  */
 public class MetainfTransformer implements CollectionIndexTransformer {
 	private static final int BUF_SIZE = 100;
-	private static final char[] LINE_SEPARATORS = System.lineSeparator().toCharArray();
-	private static final char[] PIECE_SEPARATOR = new char[] { '\t' };
+
+	private static char[] LINE_SEPARATORS = new char[] { '\n', '\r' };
+	private static char[] PIECE_SEPARATOR = new char[] { '\t' };
+
+	public static void setPieceSeparators( char[] pieceSeparators ) {
+		PIECE_SEPARATOR = pieceSeparators;
+	}
+
+	public static void setLineSeparators( char[] lineSeparators ) {
+		LINE_SEPARATORS = lineSeparators;
+	}
 
 	@Override
 	public Iterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in ) {
@@ -103,7 +112,9 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 	}
 
 	static boolean addInfo( List<ImplementationInformation> list, int r, String clazz, int prio, String type, Object extras  ) {
-		list.add( new Impl( clazz, prio, type, extras ) );
+		if ( !clazz.isEmpty() ) {
+			list.add( new Impl( clazz, prio, type, extras ) );
+		}
 		return r != -1;
 	}
 
