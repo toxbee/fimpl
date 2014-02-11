@@ -15,18 +15,15 @@
  */
 
 package se.toxbee.fimpl
+
 import se.toxbee.fimpl.common.ImplementationInformation
 import se.toxbee.fimpl.impl.ImplementationFactoryImpl
 import se.toxbee.fimpl.impl.StandardClassLoader
 import se.toxbee.fimpl.predicates.InterfacePredicate
 import se.toxbee.fimpl.predicates.Predicate
+
 import spock.lang.Specification
-/**
- *
- * @author Centril < twingoow @ gmail.com >  / Mazdak Farrokhzad.
- * @version 1.0
- * @since Feb , 04, 2014
- */
+
 class ImplementationResultSetTest extends Specification {
 	interface iface {}
 
@@ -149,20 +146,36 @@ class ImplementationResultSetTest extends Specification {
 			fillSet().clear().isEmpty()
 	}
 
-	def "Iterator"() {
+	def "iterator"() {
 		given:
 			def a = fillSet().set.iterator().collect()
 			def b = resultSet.iterator().collect()
 		expect:
-			a.equals( b )
+			a == b
 	}
 
-	def "DecendingIterator"() {
+	def "decendingIterator"() {
 		given:
 			def a = fillSet().set.descendingIterator().collect()
 			def b = resultSet.decendingIterator().collect()
 		expect:
-			a.equals( b )
+			a == b
+	}
+
+	def "loadingIterable"() {
+		testLoadingIterable( { it.loadingIterable() }, { it } )
+	}
+
+	def "loadingDecendingIterable"() {
+		testLoadingIterable( { it.loadingDecendingIterable() }, { it.reverse() } )
+	}
+
+	def testLoadingIterable( Closure<Iterable<Class<? extends iface>>> ac, Closure<Iterable<ImplementationInformation>> bc ) {
+		def s = fillSet()
+		def a = ac( s ).collect()
+		def b = bc( dummyInfos() ).collect { s.load( it ) }
+
+		assert a == b
 	}
 
 	def "Join"() {
@@ -175,6 +188,7 @@ class ImplementationResultSetTest extends Specification {
 			makeSet( dum ).join( dum ).size() == dum.size()
 			makeSet( dum ).join( [unique] )
 			              .join( [unique] )
+						  .join( unique )
 			              .size() == dum.size() + 1
 	}
 
@@ -191,7 +205,8 @@ class ImplementationResultSetTest extends Specification {
 	}
 
 	def "Use"() {
-		def predicate = Mock(Predicate)
+		given:
+			def predicate = Mock(Predicate)
 		expect:
 			makeSet().use( predicate ).pendingPredicates()[0] == predicate
 	}
@@ -201,23 +216,9 @@ class ImplementationResultSetTest extends Specification {
 			makeSet().use( Mock(Predicate) ).forget().pendingPredicates() == null
 	}
 
-	def arr( Collection<Predicate> predicates ) {
-		(Predicate[]) predicates.toArray()
-	}
+	def T = new pred(true)
 
-	def T = new Predicate<iface>() {
-		@Override
-		boolean match( ImplementationInformation info, ImplementationResultSet<iface, ?> set, boolean anyMode ) {
-			return true
-		}
-	}
-
-	def F = new Predicate<iface>() {
-		@Override
-		boolean match( ImplementationInformation info, ImplementationResultSet<iface, ?> set, boolean anyMode ) {
-			return false
-		}
-	}
+	def F = new pred(false)
 
 	def "RetainAny"() {
 		given:
@@ -265,11 +266,11 @@ class ImplementationResultSetTest extends Specification {
 	def "RecoverWithPending"() {
 		given:
 			def set = makeSet()
-			def predicates = (Predicate<iface>[]) [{ true } as Predicate<iface>].toArray()
+			def predicates = arr( [T] )
 			set.use( predicates )
 		expect:
 			set.recoverWithPending( null ) == predicates
-			set.recoverWithPending( (Predicate<iface>[]) [].toArray() ) == predicates
+			set.recoverWithPending( arr( [] ) ) == predicates
 			set.forget().recoverWithPending( predicates ) == predicates
 	}
 
@@ -284,5 +285,22 @@ class ImplementationResultSetTest extends Specification {
 		expect:
 			test( true ) == null
 			test( false )[0] == p
+	}
+
+	def arr( Collection<Predicate> predicates ) {
+		(Predicate[]) predicates.toArray()
+	}
+
+	class pred implements Predicate<iface> {
+		def boolean val
+
+		pred( boolean val ) {
+			this.val = val
+		}
+
+		@Override
+		boolean match( ImplementationInformation info, ImplementationResultSet<iface, ?> set, boolean anyMode ) {
+			return val
+		}
 	}
 }
