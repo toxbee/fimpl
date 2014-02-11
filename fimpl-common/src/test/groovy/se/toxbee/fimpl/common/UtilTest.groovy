@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package se.toxbee.fimpl
+package se.toxbee.fimpl.common
 
 import spock.lang.Shared
 import spock.lang.Specification
@@ -38,5 +38,26 @@ class UtilTest extends Specification {
 			Util.guardNull( null )
 		then:
 			thrown( NullPointerException )
+	}
+
+	def "close"() {
+		given:
+			def c1 = Mock(Closeable)
+			def c2 = Mock(Closeable)
+			c2.close() >> { throw new IOException() }
+			1 * _.close()
+		when:
+			Util.close( null )
+		then:
+			notThrown( RuntimeException )
+		when:
+			Util.close( c1 )
+		then:
+			notThrown( RuntimeException )
+		when:
+			Util.close( c2 )
+		then:
+			RuntimeException e = thrown()
+			e.cause instanceof IOException
 	}
 }

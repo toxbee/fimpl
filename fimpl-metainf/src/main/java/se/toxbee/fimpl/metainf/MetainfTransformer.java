@@ -16,7 +16,6 @@
 package se.toxbee.fimpl.metainf;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,9 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import se.toxbee.fimpl.common.ImplementationInformation;
-import se.toxbee.fimpl.Util;
 import se.toxbee.fimpl.common.ImplementationInformation.Impl;
 import se.toxbee.fimpl.impl.CollectionIndexTransformer;
+
+import static se.toxbee.fimpl.common.Util.CHARSET;
+import static se.toxbee.fimpl.common.Util.close;
 
 /**
  * MetainfTransformer transforms InputStream:s to ImplementationInformation:s.
@@ -39,6 +40,8 @@ import se.toxbee.fimpl.impl.CollectionIndexTransformer;
  */
 public class MetainfTransformer implements CollectionIndexTransformer {
 	private static final int BUF_SIZE = 100;
+	private static final char[] LINE_SEPARATORS = System.lineSeparator().toCharArray();
+	private static final char[] PIECE_SEPARATOR = new char[] { '\t' };
 
 	@Override
 	public Iterator<ImplementationInformation> readImplementationCollection( Iterator<InputStream> in ) {
@@ -51,7 +54,7 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 
 		while ( in.hasNext() ) {
 			// Open stream & reader.
-			Reader r = new InputStreamReader( in.next(), Util.CHARSET );
+			Reader r = new InputStreamReader( in.next(), CHARSET );
 			BufferedReader reader = new BufferedReader( r );
 			while ( readInfo( list, builder, reader ) );
 			close( reader );
@@ -60,59 +63,47 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 		return list.iterator();
 	}
 
-	static boolean readInfo( List<ImplementationInformation> l, StringBuilder builder, Reader reader ) {
-		int r;
-
+	static boolean readInfo( List<ImplementationInformation> list, StringBuilder buf, Reader reader ) {
 		// Read implementation class.
-		r = readToTab( builder, reader );
-
-		Object[] d = new Object[4];
-		d[0] = builder.toString();
-		if ( r == '\n' ) {
-			return builder.length() <= 0 || addInfo( r, d, l );
-		}
-		if ( r == -1 ) {
-			return addInfo( r, d, l );
+		int retr = readToTab( buf, reader );
+		String  clazz = buf.toString();
+		if ( isLineFinished( retr ) ) {
+			return buf.length() <= 0 || addInfo( list, retr, clazz, 0, null, null );
+		} else if ( retr == -1 ) {
+			return addInfo( list, retr, clazz, 0, null, null );
 		}
 
 		// Read priority.
-		r = readToTab( builder, reader );
-		String prio =  builder.toString();
-		d[1] = prio.isEmpty() ? 0 : Integer.parseInt( prio );
-		if ( isComplete( r ) ) {
-			return addInfo( r, d, l );
+		retr = readToTab( buf, reader );
+		int prio = buf.length() == 0 ? 0 : Integer.parseInt( buf.toString() );
+		if ( isComplete( retr ) ) {
+			return addInfo( list, retr, clazz, prio, null, null );
 		}
 
 		// Read type.
-		r = readToTab( builder, reader );
-		d[2] = builder.toString();
-		if ( isComplete( r ) ) {
-			return addInfo( r, d, l );
+		retr = readToTab( buf, reader );
+		String type = buf.toString();
+		if ( isComplete( retr ) ) {
+			return addInfo( list, retr, clazz, prio, type, null );
 		}
 
 		// Read extras.
-		r = readToTab( builder, reader );
-		d[3] = builder.toString();
-		if ( isComplete( r ) ) {
-			return addInfo( r, d, l );
+		retr = readToTab( buf, reader );
+		String extras = buf.toString();
+		if ( isComplete( retr ) ) {
+			return addInfo( list, retr, clazz, prio, type, extras );
 		}
 
 		// Eat anything left before newline.
 		while ( true ) {
-			if ( isComplete( r = read( reader ) ) ) {
-				return addInfo( r, d, l );
+			if ( isComplete( retr = read( reader ) ) ) {
+				return addInfo( list, retr, clazz, prio, type, extras );
 			}
 		}
 	}
 
-	static boolean isComplete( int r ) {
-		return r == '\n' || r == -1;
-	}
-
-	static boolean addInfo( int r, Object[] data, List<ImplementationInformation> list ) {
-		if ( data[0] != null ) {
-			list.add( new Impl( data ) );
-		}
+	static boolean addInfo( List<ImplementationInformation> list, int r, String clazz, int prio, String type, Object extras  ) {
+		list.add( new Impl( clazz, prio, type, extras ) );
 		return r != -1;
 	}
 
@@ -124,12 +115,34 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 		while ( true ) {
 			int c = read( reader );
 
-			if ( c == -1 || c == '\n' || c == '\t' ) {
+			if ( isComplete( c ) || isPieceFinished( c ) ) {
 				return c;
 			}
 
 			builder.append( (char) c );
 		}
+	}
+
+	static boolean isComplete( int r ) {
+		return isLineFinished( r ) || r == -1;
+	}
+
+	static boolean isPieceFinished( int r ) {
+		return charsContains( PIECE_SEPARATOR, r );
+	}
+
+	static boolean isLineFinished( int r ) {
+		return charsContains( LINE_SEPARATORS, r );
+	}
+
+	static boolean charsContains( char[] haystack, int needle ) {
+		for ( char elem : haystack ) {
+			if ( elem == needle ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	static int read( Reader reader ) {
@@ -138,14 +151,6 @@ public class MetainfTransformer implements CollectionIndexTransformer {
 			return i;
 		} catch ( IOException e ) {
 			close( reader );
-			throw new RuntimeException( e );
-		}
-	}
-
-	private static void close( Closeable c ) {
-		try {
-			c.close();
-		} catch ( IOException e ) {
 			throw new RuntimeException( e );
 		}
 	}

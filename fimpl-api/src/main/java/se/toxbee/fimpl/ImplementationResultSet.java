@@ -11,7 +11,7 @@ import se.toxbee.fimpl.common.ImplementationInformation;
 import se.toxbee.fimpl.predicates.Predicate;
 import se.toxbee.fimpl.predicates.PredicateFactory;
 
-import static se.toxbee.fimpl.Util.guardNull;
+import static se.toxbee.fimpl.common.Util.guardNull;
 
 /**
  * <p>ImplementationResultSet is the main API for fImpl.</p>

@@ -16,7 +16,7 @@
 
 package se.toxbee.fimpl.metainf
 
-import se.toxbee.fimpl.Util
+import se.toxbee.fimpl.common.Util
 import se.toxbee.fimpl.common.ImplementationInformation
 import spock.lang.Shared
 import spock.lang.Specification

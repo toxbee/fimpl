@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import se.toxbee.fimpl.ImplementationResultSet;
 import se.toxbee.fimpl.common.ImplementationInformation;
 
-import static se.toxbee.fimpl.Util.guardNull;
+import static se.toxbee.fimpl.common.Util.guardNull;
 
 /**
  * RegexPredicate uses a regex pattern to match against something.

@@ -16,7 +16,7 @@
 package se.toxbee.fimpl.predicates;
 
 import se.toxbee.fimpl.ImplementationResultSet;
-import se.toxbee.fimpl.Util;
+import se.toxbee.fimpl.common.Util;
 import se.toxbee.fimpl.common.ImplementationInformation;
 import se.toxbee.fimpl.ImplementationLoader;
 

@@ -21,7 +21,7 @@ import java.util.Iterator;
 import se.toxbee.fimpl.common.ImplementationInformation;
 import se.toxbee.fimpl.ImplementationReader;
 
-import static se.toxbee.fimpl.Util.guardNull;
+import static se.toxbee.fimpl.common.Util.guardNull;
 
 /**
  * ImplementationReaderPipe is a "pipe" separating<br/>

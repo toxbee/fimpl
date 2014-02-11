@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.toxbee.fimpl;
+package se.toxbee.fimpl.common;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
@@ -51,5 +53,22 @@ public class Util {
 		}
 
 		return val;
+	}
+
+	/**
+	 * Closes a {@link java.io.Closeable}.
+	 *
+	 * @param c the closeable to close.
+	 */
+	public static void close( Closeable c ) {
+		if ( c == null ) {
+			return;
+		}
+
+		try {
+			c.close();
+		} catch ( IOException e ) {
+			throw new RuntimeException( e );
+		}
 	}
 }

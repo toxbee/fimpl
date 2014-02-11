@@ -41,13 +41,11 @@
 package se.toxbee.fimpl.annotation;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,6 +78,7 @@ import javax.tools.StandardLocation;
 
 import se.toxbee.fimpl.common.ImplementationInformation;
 import se.toxbee.fimpl.common.ImplementationInformation.Impl;
+import se.toxbee.fimpl.common.Util;
 
 /**
  * ProvidedImplementationProcessor processes concrete types annotated<br/>
@@ -123,7 +122,6 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	final Pattern tabSplitter;
 	private Types util;
 	private Elements elements;
-	private static final Charset CHARSET = Charset.forName( "UTF-8" );
 
 	@Override
 	public Set<String> getSupportedAnnotationTypes() {
@@ -197,7 +195,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 
 			try {
 				FileObject f = filer.getResource( StandardLocation.CLASS_OUTPUT, "", this.interfaseFile( e.getKey() ) );
-				reader = new BufferedReader( new InputStreamReader( f.openInputStream(), CHARSET ) );
+				reader = new BufferedReader( new InputStreamReader( f.openInputStream(), Util.CHARSET ) );
 
 				String line;
 				while ( (line = reader.readLine()) != null ) {
@@ -208,7 +206,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 			} catch ( IOException x ) {
 				error( "Failed to load existing service definition files: " + x );
 			} finally {
-				close( reader );
+				Util.close( reader );
 			}
 		}
 	}
@@ -224,7 +222,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 
 				// Open writer for interfaseFile.
 				FileObject f = filer.createResource( StandardLocation.CLASS_OUTPUT, "", interfaseFile );
-				writer = new PrintWriter( new OutputStreamWriter( f.openOutputStream(), CHARSET ) );
+				writer = new PrintWriter( new OutputStreamWriter( f.openOutputStream(), Util.CHARSET ) );
 
 				if ( this.metaInfOnly ) {
 					// Writing using the SPI format.
@@ -242,7 +240,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 			} catch ( IOException x ) {
 				error( "Failed to write implementation definition files: " + x );
 			} finally {
-				close( writer );
+				Util.close( writer );
 			}
 		}
 	}
@@ -406,25 +404,8 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		return (TypeElement) ((DeclaredType) m).asElement();
 	}
 
-	/* ----------------------------------------------
-	 * Utils: etc.
-	 * ----------------------------------------------
-	 */
-
 	private String typeName( TypeElement type ) {
 		return this.elements.getBinaryName( type ).toString();
-	}
-
-	static void close( Closeable c ) {
-		if ( c == null ) {
-			return;
-		}
-
-		try {
-			c.close();
-		} catch ( IOException e ) {
-			throw new RuntimeException( e );
-		}
 	}
 
 	/* ----------------------------------------------

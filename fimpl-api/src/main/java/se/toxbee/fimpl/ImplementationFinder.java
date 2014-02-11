@@ -20,7 +20,7 @@ import java.util.Iterator;
 import se.toxbee.fimpl.ImplementationResultSet.Impl;
 import se.toxbee.fimpl.common.ImplementationInformation;
 
-import static se.toxbee.fimpl.Util.guardNull;
+import static se.toxbee.fimpl.common.Util.guardNull;
 
 /**
  * <p>ImplementationFinder is the entry/front class API for fImpl.</p>

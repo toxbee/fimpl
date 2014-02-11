@@ -18,12 +18,12 @@ package se.toxbee.fimpl.predicates;
 import se.toxbee.fimpl.ImplementationResultSet;
 import se.toxbee.fimpl.common.ImplementationInformation;
 
-import static se.toxbee.fimpl.Util.guardNull;
-import static se.toxbee.fimpl.Util.equal;
+import static se.toxbee.fimpl.common.Util.guardNull;
+import static se.toxbee.fimpl.common.Util.equal;
 
 /**
  * EqualsCompositePredicate provides "composite" predicates of type A.<br/>
- * It matches by using {@link se.toxbee.fimpl.Util#equal(Object, Object)}
+ * It matches by using {@link se.toxbee.fimpl.common.Util#equal(Object, Object)}
  *
  * @param <I> the interface type of the set.
  * @param <A> the type of the composite indices.

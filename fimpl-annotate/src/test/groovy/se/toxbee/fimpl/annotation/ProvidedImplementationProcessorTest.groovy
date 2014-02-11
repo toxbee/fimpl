@@ -123,25 +123,4 @@ class ProvidedImplementationProcessorTest extends Specification {
 			"c\t1"       | new ImplementationInformation.Impl( "c", 1 )
 			"c"          | new ImplementationInformation.Impl( "c" )
 	}
-
-	def "close"() {
-		given:
-			def c1 = Mock(Closeable)
-			def c2 = Mock(Closeable)
-			c2.close() >> { throw new IOException() }
-			1 * _.close()
-		when:
-			ProvidedImplementationProcessor.close( null )
-		then:
-			notThrown( RuntimeException )
-		when:
-			ProvidedImplementationProcessor.close( c1 )
-		then:
-			notThrown( RuntimeException )
-		when:
-			ProvidedImplementationProcessor.close( c2 )
-		then:
-			RuntimeException e = thrown()
-			e.cause instanceof IOException
-	}
 }
