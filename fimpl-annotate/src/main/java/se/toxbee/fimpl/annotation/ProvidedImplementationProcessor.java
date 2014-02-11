@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
+/*
+* The MIT License
+*
+* Copyright (c) 2009-, Kohsuke Kawaguchi
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*/
+
 package se.toxbee.fimpl.annotation;
 
 import java.io.BufferedReader;
@@ -65,7 +89,8 @@ import se.toxbee.fimpl.common.ImplementationInformation.Impl;
  * @version 1.0.1
  * @since Feb, 05, 2014
  */
-@SupportedOptions({"meta.location", "meta.inf.only"})
+@SupportedOptions({ ProvidedImplementationProcessor.OPTION_META_LOCATION,
+					ProvidedImplementationProcessor.OPTION_METAINF_ONLY })
 @SupportedSourceVersion( SourceVersion.RELEASE_7 )
 public class ProvidedImplementationProcessor extends AbstractProcessor {
 	/* ----------------------------------------------
@@ -73,19 +98,32 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	 * ----------------------------------------------
 	 */
 
-	public static String META_LOCATION = "META-INF/services/";
-	public static boolean METAINF_ONLY = false;
+	public static final String OPTION_META_LOCATION = "meta.location";
+	public static final String OPTION_METAINF_ONLY = "meta.inf.only";
 
 	/* ----------------------------------------------
 	 * Private Config.
 	 * ----------------------------------------------
 	 */
 
+	public static String OPTION_DEFAULT_META_LOCATION = "META-INF/services/";
+	public static boolean OPTION_DEFAULT_METAINF_ONLY = false;
+
 	private static final Class<ProvidedImplementation> ANNOTATION_CLAZZ = ProvidedImplementation.class;
-	private static final String ANNOTATION_TYPE = ANNOTATION_CLAZZ.getName();
+	private final String ANNOTATION_TYPE = ANNOTATION_CLAZZ.getName();
+
+	/* ----------------------------------------------
+	 * Tools of Implementation.
+	 * ----------------------------------------------
+	 */
+
+	String metaLocation;
+	boolean metaInfOnly;
+
+	final Pattern tabSplitter;
+	private Types util;
+	private Elements elements;
 	private static final Charset CHARSET = Charset.forName( "UTF-8" );
-	private String metaLocation;
-	private boolean metaInfOnly;
 
 	@Override
 	public Set<String> getSupportedAnnotationTypes() {
@@ -97,31 +135,33 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	 * ----------------------------------------------
 	 */
 
-	private Pattern tabSplitter;
-	private Types util;
-	private Elements elements;
+	/**
+	 * Constructs the processor.
+	 */
+	public ProvidedImplementationProcessor() {
+		super();
+
+		this.tabSplitter = Pattern.compile( "\t", Pattern.LITERAL );
+	}
 
 	@Override
 	public synchronized void init( ProcessingEnvironment processingEnv ) {
 		super.init( processingEnv );
 
-		this.readOptions();
-
-		this.tabSplitter = Pattern.compile( "\t", Pattern.LITERAL );
 		this.util = this.processingEnv.getTypeUtils();
 		this.elements = this.processingEnv.getElementUtils();
+
+		this.readOptions();
 	}
 
 	private void readOptions() {
 		Map<String, String> opts = this.processingEnv.getOptions();
 
-		this.metaLocation = opts.get( "meta.location" );
-		if ( this.metaLocation == null ) {
-			this.metaLocation = META_LOCATION;
-		}
+		String metaLocation = opts.get( OPTION_META_LOCATION );
+		this.metaLocation = metaLocation == null ? OPTION_DEFAULT_META_LOCATION : metaLocation;
 
-		String metaOnly = opts.get( "meta.inf.only" );
-		this.metaInfOnly = metaOnly == null ? METAINF_ONLY : Boolean.parseBoolean( metaOnly );
+		String metaOnly = opts.get( OPTION_METAINF_ONLY );
+		this.metaInfOnly = metaOnly == null ? OPTION_DEFAULT_METAINF_ONLY : Boolean.parseBoolean( metaOnly );
 	}
 
 	@Override
@@ -161,7 +201,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 
 				String line;
 				while ( (line = reader.readLine()) != null ) {
-					set.add( this.metaInfOnly ? new Impl( line ) : new Impl( tabSplitter.split( line, 4 ) ) );
+					set.add( this.metaInfOnly ? new Impl( line ) : Impl.from( tabSplitter.split( line, 4 ) ) );
 				}
 			} catch ( FileNotFoundException x ) {
 				// doesn't exist
@@ -179,32 +219,24 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 
 			try {
 				String interfaseFile = this.interfaseFile( e.getKey() );
-				msg().printMessage( Kind.NOTE, "Writing " + interfaseFile );
+
+				note( "Writing " + interfaseFile );
+
+				// Open writer for interfaseFile.
 				FileObject f = filer.createResource( StandardLocation.CLASS_OUTPUT, "", interfaseFile );
 				writer = new PrintWriter( new OutputStreamWriter( f.openOutputStream(), CHARSET ) );
 
 				if ( this.metaInfOnly ) {
+					// Writing using the SPI format.
 					for ( ImplementationInformation info : e.getValue() ) {
 						writer.println( info.getImplementorClass() );
 					}
 				} else {
 					for ( ImplementationInformation info : e.getValue() ) {
-						writer.print( info.getImplementorClass() );
-						int len = info.getType() != null ? 2 : (info.getPriority() != 0 ? 1 : 0);
-						for ( int i = 1; i <= len; ++i ) {
-							writer.print( '\t' );
-
-							switch ( i ) {
-								case 1:
-									writer.print( info.getPriority() );
-									break;
-
-								case 2:
-									writer.print( info.getType() );
-									break;
-							}
-						}
-						writer.println();
+						// Writing using our own meta-data format.
+						String data = this.formatImplementationMetadata( info );
+						note( "Writing implementation meta-data: " + data );
+						writer.println( data );
 					}
 				}
 			} catch ( IOException x ) {
@@ -215,6 +247,34 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		}
 	}
 
+	String formatImplementationMetadata( ImplementationInformation info ) {
+		// Format using our own meta-data format.
+		StringBuilder buf = new StringBuilder();
+		buf.append( info.getImplementorClass() );
+
+		int len = info.getExtras() == null ? (info.getType() == null ? (info.getPriority() == 0 ? 0 : 1) : 2) : 3;
+
+		for ( int i = 1; i <= len; ++i ) {
+			buf.append( '\t' );
+
+			switch ( i ) {
+				case 1:
+					buf.append( info.getPriority() );
+					break;
+
+				case 2:
+					buf.append( info.getType() );
+					break;
+
+				case 3:
+					buf.append( info.getExtras() );
+					break;
+			}
+		}
+
+		return buf.toString();
+	}
+
 	private void discoverImplementations( Map<String, Set<ImplementationInformation>> store, RoundEnvironment roundEnv ) {
 		for ( Element e : roundEnv.getElementsAnnotatedWith( ProvidedImplementation.class ) ) {
 			ProvidedImplementation pi = e.getAnnotation( ProvidedImplementation.class );
@@ -222,7 +282,9 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 						implemented = getContract( type, pi );
 
 			if ( implemented != null ) {
-				getSet( store, typeName( implemented ) ).add( new Impl( typeName( type ), pi.priority(), pi.type() ) );
+				ImplementationInformation info = new Impl( typeName( type ), pi.priority(), pi.type(), pi.extras() );
+				Set<ImplementationInformation> set = getSet( store, typeName( implemented ) );
+				set.add( info );
 			}
 		}
 	}
@@ -275,7 +337,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		boolean hasBaseClass = isBaseClass( superClass );
 		boolean hasInterface = interfases.size() == 1;
 
-		if ( isBaseClass( superClass ) ^ hasInterface ) {
+		if ( hasBaseClass ^ hasInterface ) {
 			return type( hasBaseClass ? superClass : interfases.get( 0 ) );
 		}
 
@@ -333,10 +395,10 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 	}
 
 	private static boolean isBaseClass( TypeMirror baseClass ) {
-		return baseClass.getKind() != TypeKind.NONE;
+		return baseClass.getKind() != TypeKind.NONE && !isObject( type( baseClass ) );
 	}
 
-	private static boolean isObject( TypeElement type ) {
+	static boolean isObject( TypeElement type ) {
 		return type.getQualifiedName().toString().equals( "java.lang.Object" );
 	}
 
@@ -353,7 +415,7 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 		return this.elements.getBinaryName( type ).toString();
 	}
 
-	private static void close( Closeable c ) {
+	static void close( Closeable c ) {
 		if ( c == null ) {
 			return;
 		}
@@ -385,6 +447,10 @@ public class ProvidedImplementationProcessor extends AbstractProcessor {
 
 	private void error( String msg ) {
 		msg().printMessage( Kind.ERROR, msg );
+	}
+
+	private void note( String msg ) {
+		msg().printMessage( Kind.NOTE, msg );
 	}
 
 	private Messager msg() {

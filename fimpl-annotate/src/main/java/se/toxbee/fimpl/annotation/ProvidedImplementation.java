@@ -73,4 +73,12 @@ public @interface ProvidedImplementation {
 	 * @return the type.
 	 */
 	String type() default "";
+
+	/**
+	 * The extras of the implementation - not guaranteed to be a unique value.<br/>
+	 * An empty value should be understood as "null" type.
+	 *
+	 * @return the type.
+	 */
+	String extras() default "";
 }

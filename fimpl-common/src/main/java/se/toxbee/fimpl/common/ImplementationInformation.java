@@ -126,7 +126,7 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 		 * @return null if strings is null or empty.
 		 */
 		public static Impl from( String... strings ) {
-			if ( strings == null && strings.length == 0 ) {
+			if ( strings == null || strings.length == 0 ) {
 				return null;
 			}
 
@@ -134,13 +134,13 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 
 			switch ( strings.length ) {
 				default:
-				case 3:
+				case 4:
 					data[3] = strings[3];
-				case 2:
+				case 3:
 					data[2] = strings[2];
-				case 1:
+				case 2:
 					data[1] = Integer.parseInt( strings[1] );
-				case 0:
+				case 1:
 					data[0] = strings[0];
 			}
 
@@ -189,8 +189,12 @@ public abstract class ImplementationInformation implements Comparable<Implementa
 			super( implementorClass );
 			this.implementorClass = implementorClass;
 			this.priority = priority;
-			this.type = type == null ? null : (type.equals( "" ) ? null : type);
-			this.extras = extras;
+			this.type = emptyAsNull( type );
+			this.extras = emptyAsNull( extras );
+		}
+
+		private static <T> T emptyAsNull( T o ) {
+			return o != null && o.equals( "" ) ? null : o;
 		}
 
 		/**
