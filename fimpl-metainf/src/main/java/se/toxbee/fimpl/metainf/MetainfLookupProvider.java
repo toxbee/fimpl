@@ -34,7 +34,6 @@ import se.toxbee.fimpl.impl.InterfaceLookupProvider;
 /**
  * MetainfLookupProvider looks up in META-INF + jars or folders like it.
  *
- *
  * @author Centril<twingoow@gmail.com> / Mazdak Farrokhzad.
  * @version 1.0
  * @since Jan, 25, 2014
@@ -126,31 +125,6 @@ public class MetainfLookupProvider implements InterfaceLookupProvider {
 		}
 
 		return res.hasMoreElements() ? new IterAdapter( res ) : null;
-	}
-
-	private static class IterAdapter implements Iterator<InputStream> {
-		private final Enumeration<URL> urls;
-
-		private IterAdapter( Enumeration<URL> urls ) {
-			this.urls = urls;
-		}
-		@Override
-		public boolean hasNext() {
-			return this.urls.hasMoreElements();
-		}
-
-		@Override
-		public InputStream next() {
-			try {
-				return this.urls.nextElement().openStream();
-			} catch ( IOException e ) {
-				throw new RuntimeException( e );
-			}
-		}
-
-		@Override
-		public void remove() {
-		}
 	}
 
 	private Enumeration<URL> getResources( String fulluri ) throws IOException {
