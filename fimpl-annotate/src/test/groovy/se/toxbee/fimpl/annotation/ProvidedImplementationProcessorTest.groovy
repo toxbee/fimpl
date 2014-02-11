@@ -15,6 +15,7 @@
  */
 
 package se.toxbee.fimpl.annotation
+
 import se.toxbee.fimpl.common.ImplementationInformation
 import spock.lang.Specification
 

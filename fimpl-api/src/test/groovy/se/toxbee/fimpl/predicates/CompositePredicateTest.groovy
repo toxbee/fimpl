@@ -19,12 +19,7 @@ package se.toxbee.fimpl.predicates
 import se.toxbee.fimpl.ImplementationResultSet
 import se.toxbee.fimpl.common.ImplementationInformation
 import spock.lang.Specification
-/**
- *
- * @author Centril < twingoow @ gmail.com >  / Mazdak Farrokhzad.
- * @version 1.0
- * @since Feb , 03, 2014
- */
+
 class CompositePredicateTest extends Specification {
 	static class cp extends CompositePredicate<Object, Boolean> {
 		cp( Boolean... matchers ) {

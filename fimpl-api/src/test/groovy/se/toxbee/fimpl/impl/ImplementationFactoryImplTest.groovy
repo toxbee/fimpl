@@ -15,8 +15,10 @@
  */
 
 package se.toxbee.fimpl.impl
+
 import se.toxbee.fimpl.ImplementationLoader
 import se.toxbee.fimpl.ImplementationReader
+
 import spock.lang.Specification
 
 class ImplementationFactoryImplTest extends Specification {
