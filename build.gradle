@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+def g = "se.toxbee.fimpl"
+def v = '0.2.0'
+
 task wrapper( type: Wrapper ) {
 	gradleVersion = '1.10'
 }
@@ -33,14 +36,19 @@ task cleanOutput(type: Delete) { delete 'classes' }
 
 subprojects {
 	apply plugin: 'java'
-	apply plugin: 'maven-publish'
 
+	group = g
+	version = v
+
+	/*
+	 * Tasks for clearing:
+	 */
 	task cleanAll(dependsOn: [clean, cleanMaven, cleanOutput]) {}
+	task c(dependsOn: cleanAll)
 
-	group = "se.toxbee.fimpl"
-	version = '0.1.1'
-
-	// Used for testing:
+	/*
+	 * Testing config:
+	 */
 	apply plugin: 'groovy'
 	repositories {
 		mavenCentral()
@@ -50,6 +58,12 @@ subprojects {
 		testCompile 'org.objenesis:objenesis:1.1'
 		testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
 	}
+
+	/*
+	 * Publishing config:
+	 */
+	apply plugin: 'maven-publish'
+	build.finalizedBy publish
 
 	// javadoc.jar generation
 	task sourceJar (type : Jar) {
@@ -124,8 +138,6 @@ subprojects {
 			}
 		}
 	}
-
-	build.finalizedBy publish
 }
 
 configure( subprojects.findAll { it.name != 'fimpl-common' } ) {
