@@ -38,7 +38,7 @@ subprojects {
 	task cleanAll(dependsOn: [clean, cleanMaven, cleanOutput]) {}
 
 	group = "se.toxbee.fimpl"
-	version = '0.1'
+	version = '0.1.1'
 
 	// Used for testing:
 	apply plugin: 'groovy'
