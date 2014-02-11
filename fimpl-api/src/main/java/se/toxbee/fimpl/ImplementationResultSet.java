@@ -206,7 +206,7 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	}
 
 	/* -----------------------------------------------
-	 * Public API: Accessing the front implementation.
+	 * Public API: Accessing the implementations.
 	 * -----------------------------------------------
 	 */
 
@@ -218,7 +218,39 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	 * @return the loaded class object.
 	 */
 	public Class<? extends I> first() {
-		return this.provider.loader().loadImplementation( this.firstInfo(), this.interfase() );
+		return this.load( this.firstInfo() );
+	}
+
+	/**
+	 * Loads the given info.
+	 *
+	 * @param info the info to load.
+	 * @return the class of the info.
+	 */
+	public Class<? extends I> load( ImplementationInformation info ) {
+		return this.provider.loader().loadImplementation( info, this.interfase() );
+	}
+
+	/**
+	 * Creates an {@link java.lang.Iterable} that calls
+	 * {@link #load(se.toxbee.fimpl.common.ImplementationInformation)}
+	 * on the result of {@link #iterator()}.
+	 *
+	 * @return the iterable.
+	 */
+	public Iterable<Class<? extends I>> loadingIterable() {
+		return this.wrapIterator( this.iterator() );
+	}
+
+	/**
+	 * Creates an {@link java.lang.Iterable} that calls
+	 * {@link #load(se.toxbee.fimpl.common.ImplementationInformation)}
+	 * on the result of {@link #decendingIterator()}.
+	 *
+	 * @return the iterable.
+	 */
+	public Iterator<Class<? extends I>> loadingDecendingIterable() {
+		return new ItrWrapper( this.decendingIterator() );
 	}
 
 	/**
@@ -229,6 +261,61 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	 */
 	public ImplementationInformation firstInfo() {
 		return this.set.getFirst();
+	}
+
+	@Override
+	public Iterator<ImplementationInformation> iterator() {
+		return this.set.iterator();
+	}
+
+	/**
+	 * Returns a descending iterator for set.
+	 *
+	 * @return the iterator.
+	 */
+	public Iterator<ImplementationInformation> decendingIterator() {
+		return this.set.descendingIterator();
+	}
+
+	/* -----------------------------------
+	 * Private utility: Iterator wrapping.
+	 * -----------------------------------
+	 */
+
+	/**
+	 * Wraps an iterator of ImplementationInformation:s.
+	 *
+	 * @param iter the iterator.
+	 * @return the wrapper.
+	 */
+	protected Iterable<Class<? extends I>> wrapIterator( Iterator<ImplementationInformation> iter ) {
+		return new IterableWrapper<Class<? extends I>>( new ItrWrapper( iter ) );
+	}
+
+	/**
+	 * The wrapper for ImplementationInformation => Class.
+	 */
+	protected class ItrWrapper implements Iterator<Class<? extends I>> {
+		Iterator<ImplementationInformation> backend;
+
+		public ItrWrapper( Iterator<ImplementationInformation> backend ) {
+			this.backend = backend;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return backend.hasNext();
+		}
+
+		@Override
+		public Class<? extends I> next() {
+			return load( backend.next() );
+		}
+
+		@Override
+		public void remove() {
+			backend.remove();
+		}
 	}
 
 	/* ---------------------------------
@@ -263,19 +350,6 @@ public abstract class ImplementationResultSet<I, R extends ImplementationResultS
 	public R clear() {
 		this.set.clear();
 		return my();
-	}
-
-	public Iterator<ImplementationInformation> iterator() {
-		return this.set.iterator();
-	}
-
-	/**
-	 * Returns a descending iterator for set.
-	 *
-	 * @return the iterator.
-	 */
-	public Iterator<ImplementationInformation> decendingIterator() {
-		return this.set.descendingIterator();
 	}
 
 	/* -------------------
