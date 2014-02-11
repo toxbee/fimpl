@@ -23,14 +23,13 @@ import javax.tools.*
 import java.nio.charset.Charset
 
 public class ProcessorVerification extends Specification {
-	static String BASE_PATH = "fimpl-annotate/"
+	static String BASE_PATH = System.getProperty("user.dir").contains( "fimpl-annotate" ) ? "" : "fimpl-annotate/"
 	static String OUTPUT_PATH = System.getProperty("user.dir") + '/' + BASE_PATH + "build/tmp/test"
 	static String INPUT_PATH = BASE_PATH + "src/test/java/"
 
 	class TestCase implements CompilerTestCase {
 		@Override
 		Iterable<String> getClassesToCompile() {
-			println clazz( ZeInterface )
 			return [clazz( ZeInterface ), clazz( AnnotatedClass_1 ), clazz( AnnotatedClass_2 )];
 		}
 
