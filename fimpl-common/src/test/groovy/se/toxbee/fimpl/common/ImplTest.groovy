@@ -61,16 +61,22 @@ class ImplTest extends Specification {
 			"typeB" | "typeB"
 	}
 
-	def "GetExtras"() {
-		given:
-			def info = new ImplementationInformation.Impl(interfase, 0, null)
-			def info2 = new ImplementationInformation.Impl(interfase, 0, null, null)
-			def info3 = new ImplementationInformation.Impl(interfase, 0, null, d)
+	def "GetExtras_1"() {
 		expect:
-			info.getExtras() == info2.getExtras()
-			info3.getExtras() == d
+			new ImplementationInformation.Impl(interfase, 0, null).getExtras() == null
+	}
+
+	def "GetExtras_2"() {
+		given:
+			def info = new ImplementationInformation.Impl( interfase, 0, null, data )
+		expect:
+			info.getExtras() == expected
 		where:
-			d << ["obj", 1]
+			data | expected
+			null | null
+			""   | null
+			"eA" | "eA"
+			"eB" | "eB"
 	}
 
 	def "HashCode"() {
