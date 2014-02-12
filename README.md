@@ -94,3 +94,23 @@ dependencies {
 1. it's not agnostic as to where the meta-data comes from or how it is formatted.
 2. it always creates objects of the implementations.
 3. you can only use the default-constructor.
+
+## Changelog
+
+See [CHANGES.md](CHANGES.md).
+
+## Contributing & Issues
+
+If you've found a bug or would like a feature to be added, please make an issue.
+We'll be restrictive when it comes to adding new implementations,
+you can always create a new repository / project that depends on this one.
+
+If you want to contribute, fork the project and make a pull-request.
+
+## License
+
+Licensed under the Apache License, Version 2.0
+
+See [LICENSE.md](LICENSE.md) for details.
+
+Copyright 2014 toxbee.se
