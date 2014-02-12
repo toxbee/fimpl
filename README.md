@@ -82,8 +82,8 @@ repositories {
 }
 
 dependencies {
-  compile 'se.toxbee.fimpl:fimpl-annotate:0.1' // for annotations
-  compile 'se.toxbee.fimpl:fimpl-metainf:0.1' // for meta-inf implementation of API.
+  compile 'se.toxbee.fimpl:fimpl-annotate:0.2.0' // for annotations
+  compile 'se.toxbee.fimpl:fimpl-metainf:0.2.0' // for meta-inf implementation of API.
 }
 ```
 
